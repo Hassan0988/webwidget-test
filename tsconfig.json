@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "target": "es6",
+    "module": "ESNext", // Change this to ES6 or ESNext
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "rootDir": "./src",
+    "outDir": "./public", // Output directly to public for frontend scripts
+    "moduleResolution": "node" // Ensures module resolution works for imports
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules"]
+}
