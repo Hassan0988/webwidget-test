@@ -1,4 +1,5 @@
 import { RetellWebClient } from "../node_modules/retell-client-js-sdk";
+import "./widget.js";
 
 const retellWebClient = new RetellWebClient();
 

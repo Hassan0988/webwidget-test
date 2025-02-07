@@ -1,5 +1,6 @@
 // webpack.config.js
 const path = require('path');
+const TerserPlugin = require('terser-webpack-plugin');
 
 module.exports = {
   entry: './src/script.ts',  // Entry file for bundling
@@ -17,7 +18,12 @@ module.exports = {
         use: 'ts-loader', // Use ts-loader to transpile TypeScript
         exclude: /node_modules/, // Ignore node_modules
       },
+      {
+        test: /\.js$/,
+        exclude: /node_modules/,
+      }
     ],
   },
   mode: 'production', // Set mode to production for optimized bundle
+
 };

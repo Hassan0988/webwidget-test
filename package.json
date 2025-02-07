@@ -14,7 +14,8 @@
   "dependencies": {
     "dotenv": "^16.4.5",
     "express": "^4.21.1",
-    "retell-client-js-sdk": "^2.0.0"
+    "retell-client-js-sdk": "^2.0.0",
+    "terser-webpack-plugin": "^5.3.11"
   },
   "devDependencies": {
     "@types/express": "^5.0.0",

@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "allowJs": true,
     "target": "es6",
     "module": "ESNext", // Change this to ES6 or ESNext
     "esModuleInterop": true,
