@@ -1,0 +1,122 @@
+.ava-agent-talking {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  /* display: flex;
+  justify-content: center;
+  align-items: center;
+  background: url("https://i.ibb.co/9TXggCD/Agent.jpg") no-repeat center center;
+  background-size: cover; */
+  box-shadow: rgba(0, 0, 0, 0.3) 0px 4px 8px;
+}
+
+.ava-agent-talking,
+.ava-user-talking {
+  display: none;
+}
+
+.ava-not-started {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: rgba(0, 0, 0, 0.3) 0px 4px 8px;
+}
+
+.ava-user-talking {
+  /* display: flex; */
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+}
+
+.ava-loading,
+.ava-agent-talking {
+  display: none;
+}
+
+/* .ava-user-talking {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: rgba(0, 0, 0, 0.3) 0px 4px 8px;
+} */
+
+.ava-widget-container {
+  display: none;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  /* width: 90px; */
+  min-height: 90px;
+  min-width: 90px;
+  height: 100%;
+  width: 100%;
+  border-radius: 50%;
+  padding: 8px;
+  background-color: transparent;
+  border: 1px solid #c2c2c2;
+  box-shadow: rgba(58, 174, 248, 0.3) 0px 18.19px 63.67px 0px;
+  cursor: pointer;
+}
+
+.ava-state-container {
+  background: linear-gradient(to right, rgb(234, 89, 115), rgb(168, 52, 176));
+  height: 100%;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.ava-quiet {
+  width: 100%;
+  max-width: 30%;
+  transition: transform 0.3s;
+  transform: scale(1);
+}
+
+.ava-user-talking .wave-bar {
+  width: 6px;
+  height: 30px;
+  margin: 0 2px;
+  background-color: white;
+  border-radius: 3px;
+  animation: wave-animation 1s ease-in-out infinite;
+}
+
+@keyframes wave-animation {
+  0%,
+  100% {
+    height: 20px;
+  }
+
+  50% {
+    height: 40px;
+  }
+}
+
+.talktoava {
+  width: 120px;
+}
+
+.widget-img {
+  background-size: contain !important;
+}
+
+@keyframes waves {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  100% {
+    opacity: 0;
+    transform: scale(3);
+  }
+}
