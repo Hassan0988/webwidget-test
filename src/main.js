@@ -126,8 +126,6 @@ function onAgentStopTalking(apiKey) {
     const agentImg = el.querySelector(".ava-agent-talking");
     const userEl = el.querySelector(".ava-user-talking");
 
-    clearTimeout(callState.talkingTimeoutID);
-
     callState.notTalkingTimeoutID = setTimeout(() => {
       agentImg.style.display = "none";
       userEl.style.display = "flex";
@@ -181,7 +179,9 @@ async function startCall(apiKey) {
 
   const res = await req.json();
 
-  if (!req.ok) throw new Error(res);
+  if (!req.ok) {
+    throw new Error(`${req.status} ${req.statusText}: ${res}`);
+  }
 
   // console.log(res);
 
