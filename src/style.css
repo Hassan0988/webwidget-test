@@ -2,27 +2,19 @@
   width: 100%;
   height: 100%;
   border-radius: 50%;
-  /* display: flex;
-  justify-content: center;
-  align-items: center;
-  background: url("https://i.ibb.co/9TXggCD/Agent.jpg") no-repeat center center;
-  background-size: cover; */
   box-shadow: rgba(0, 0, 0, 0.3) 0px 4px 8px;
 }
 
-.ava-agent-talking,
+.ava-agent-talking {
+  display: none;
+}
+
 .ava-user-talking {
   display: none;
 }
 
-.ava-not-started {
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  box-shadow: rgba(0, 0, 0, 0.3) 0px 4px 8px;
+.ava-loading {
+  display: none;
 }
 
 .ava-user-talking {
@@ -33,26 +25,10 @@
   height: 100%;
 }
 
-.ava-loading,
-.ava-agent-talking {
-  display: none;
-}
-
-/* .ava-user-talking {
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  box-shadow: rgba(0, 0, 0, 0.3) 0px 4px 8px;
-} */
-
 .ava-widget-container {
   display: none;
+  position: relative;
   aspect-ratio: 1 / 1;
-  overflow: hidden;
-  /* width: 90px; */
   min-height: 90px;
   min-width: 90px;
   height: 100%;
@@ -60,7 +36,7 @@
   border-radius: 50%;
   padding: 8px;
   background-color: transparent;
-  border: 1px solid #c2c2c2;
+  border: 1px solid #bcbcbc;
   box-shadow: rgba(58, 174, 248, 0.3) 0px 18.19px 63.67px 0px;
   cursor: pointer;
 }
@@ -72,6 +48,14 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  overflow: hidden;
+}
+
+.agent-img-container {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  display: flex;
 }
 
 .ava-quiet {
@@ -88,6 +72,51 @@
   background-color: white;
   border-radius: 3px;
   animation: wave-animation 1s ease-in-out infinite;
+}
+
+.ripple-container {
+  display: none;
+}
+
+.ripple {
+  position: absolute;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  opacity: 0;
+  top: 50%;
+  left: 50%;
+  z-index: 10;
+  border: 1px solid #848484;
+}
+
+.ripple-1 {
+  animation: ripple 2s ease-in-out infinite;
+}
+
+.ripple-2 {
+  animation: ripple 2s ease-in-out infinite 0.8s;
+}
+
+.ripple-3 {
+  animation: ripple 2s ease-in-out infinite 1.2s;
+}
+
+@keyframes ripple {
+  0% {
+    width: 100%;
+    height: 100%;
+    transform: translate(-50%, -50%);
+    opacity: 0;
+  }
+  20% {
+    opacity: 1;
+  }
+  100% {
+    width: 130%;
+    height: 130%;
+    transform: translate(-50%, -50%);
+    opacity: 0;
+  }
 }
 
 @keyframes wave-animation {

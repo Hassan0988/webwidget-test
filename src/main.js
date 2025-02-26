@@ -9,7 +9,7 @@ const state = {
 */
 };
 
-const divAttrName = "data-ava-key";
+const divAttrName = "data-widget-key";
 const getDefaultApiHeaders = (apiKey) => ({
   "Content-Type": "application/json",
   "X-Data-Source": "staging",
@@ -55,11 +55,29 @@ async function onPageLoad() {
     el.innerHTML = widgetTemplate;
 
     const container = el.querySelector(".ava-widget-container");
-    const agentImg = el.querySelector(".ava-agent-talking");
+    const agentImg = el.querySelector(".ava-agent-talking img");
     const stateContainer = el.querySelector(".ava-state-container");
+    const rippleContainer = el.querySelector(".ripple-container");
 
     stateContainer.style.background = c.bgColor;
     agentImg.src = voiceIDImages[c.voice_id];
+
+    container.style.width = "120px";
+    container.style.height = "120px";
+
+    if (c.size === "medium") {
+      container.style.width = "220px";
+      container.style.height = "220px";
+    }
+
+    if (c.size === "large") {
+      container.style.width = "350px";
+      container.style.height = "350px";
+    }
+
+    if (c.speakingAnimation) {
+      rippleContainer.style.display = "block";
+    }
 
     state[c.key] = {};
     state[c.key].callInProgress = false;
