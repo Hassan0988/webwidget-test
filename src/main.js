@@ -1,5 +1,4 @@
 import widgetTemplate from "@/widget-template.html?raw";
-import { getConfigsUrl, createWebCallUrl, voiceIDImages } from "@/constants";
 import { CallManager } from "@/retell";
 import "./style.css";
 
@@ -10,6 +9,10 @@ const state = {
 };
 
 const divAttrName = "data-widget-key";
+const baseApiUrl = "https://xrur-hdnn-8wyr.n7c.xano.io/api:Jy1ozuiJ";
+const getConfigsUrl = `${baseApiUrl}/widget-config-public`;
+const createWebCallUrl = `${baseApiUrl}/createWebCallForWidget`;
+
 const getDefaultApiHeaders = (apiKey) => ({
   "Content-Type": "application/json",
   "X-Data-Source": "staging",
@@ -59,8 +62,8 @@ async function onPageLoad() {
     const stateContainer = el.querySelector(".ava-state-container");
     const rippleContainer = el.querySelector(".ripple-container");
 
+    agentImg.src = c.agent_image;
     stateContainer.style.background = c.bgColor;
-    agentImg.src = voiceIDImages[c.voice_id];
 
     container.style.width = "120px";
     container.style.height = "120px";
