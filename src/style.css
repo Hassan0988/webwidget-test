@@ -29,8 +29,8 @@
   display: none;
   position: relative;
   aspect-ratio: 1 / 1;
-  min-height: 90px;
-  min-width: 90px;
+  min-height: 50px;
+  min-width: 50px;
   height: 100%;
   width: 100%;
   border-radius: 50%;

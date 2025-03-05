@@ -16,7 +16,7 @@ const createWebCallUrl = `${baseApiUrl}/createWebCallForWidget`;
 const getDefaultApiHeaders = (apiKey) => ({
   "Content-Type": "application/json",
   "X-Data-Source": "staging",
-  "X-Branch": "dev",
+  "X-Branch": "staging",
   ...(apiKey && { Authorization: `Bearer ${apiKey}` }),
 });
 
@@ -65,17 +65,17 @@ async function onPageLoad() {
     agentImg.src = c.agent_image;
     stateContainer.style.background = c.bgColor;
 
-    container.style.width = "120px";
-    container.style.height = "120px";
+    container.style.maxWidth = "120px";
+    container.style.maxHeight = "120px";
 
     if (c.size === "medium") {
-      container.style.width = "220px";
-      container.style.height = "220px";
+      container.style.maxWidth = "220px";
+      container.style.maxHeight = "220px";
     }
 
     if (c.size === "large") {
-      container.style.width = "350px";
-      container.style.height = "350px";
+      container.style.maxWidth = "350px";
+      container.style.maxHeight = "350px";
     }
 
     if (c.speakingAnimation) {
@@ -101,7 +101,7 @@ async function getWidgetConfig(apiKey) {
   const res = await req.json();
 
   if (!req.ok) {
-    throw new Error(`${req.status} ${req.statusText}: ${res}`);
+    throw new Error(`${req.status} ${req.statusText}`);
   }
 
   return res;
@@ -201,7 +201,7 @@ async function startCall(apiKey) {
   const res = await req.json();
 
   if (!req.ok) {
-    throw new Error(`${req.status} ${req.statusText}: ${res}`);
+    throw new Error(`${req.status} ${req.statusText}`);
   }
 
   // console.log(res);
