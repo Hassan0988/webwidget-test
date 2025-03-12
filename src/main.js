@@ -2,10 +2,13 @@ import widgetTemplate from "@/widget-template.html?raw";
 import { CallManager } from "@/retell";
 import "./style.css";
 
+document.addEventListener("DOMContentLoaded", setupObserver);
+
 const state = {
   /*
   [apiKey]: {callInProgress: boolean, isLoading: boolean, callInstance: retell instance obj, talkingTimeoutID: number, notTalkingTimeoutID: number}
 */
+  isScanning: false,
 };
 
 const divAttrName = "data-widget-key";
@@ -20,8 +23,6 @@ const getDefaultApiHeaders = (apiKey) => ({
   ...(apiKey && { Authorization: `Bearer ${apiKey}` }),
 });
 
-document.addEventListener("DOMContentLoaded", onPageLoad);
-
 function $(q, all) {
   return all ? document.querySelectorAll(q) : document.querySelector(q);
 }
@@ -30,14 +31,33 @@ function getWidgetEl(apiKey) {
   return $(`[${divAttrName}="${apiKey}"]`);
 }
 
-async function onPageLoad() {
-  const widgets = $(`[${divAttrName}]`, true);
+async function setupObserver() {
+  await scanForWidgets().finally(() => {
+    state.isScanning = false;
+  });
 
-  // console.log({ widgets });
+  const observer = new MutationObserver(() => {
+    scanForWidgets().finally(() => {
+      state.isScanning = false;
+    });
+  });
+
+  observer.observe(document.body, {
+    childList: true,
+    subtree: true,
+  });
+}
+
+async function scanForWidgets() {
+  if (state.isScanning) return;
+
+  state.isScanning = true;
+
+  const widgets = $(`[${divAttrName}]`, true);
 
   const apiKeys = Array.from(widgets, (el) =>
     el.getAttribute(divAttrName)
-  ).filter(Boolean);
+  ).filter((k) => !(k in state) && !!k);
 
   const promises = apiKeys.map((k) => getWidgetConfig(k));
 
@@ -45,6 +65,10 @@ async function onPageLoad() {
 
   const configs = apiKeys
     .map((k, i) => {
+      if (results[i].status === "rejected") {
+        state[k] = null;
+      }
+
       if (results[i].status === "fulfilled") {
         return { key: k, ...results[i].value };
       }
