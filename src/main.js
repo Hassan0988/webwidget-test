@@ -1,5 +1,6 @@
 import widgetTemplate from "@/widget-template.html?raw";
 import { CallManager } from "@/retell";
+import micSvg from "./mic.svg";
 import "./style.css";
 
 document.addEventListener("DOMContentLoaded", setupObserver);
@@ -79,12 +80,16 @@ async function scanForWidgets() {
 
   for (const c of configs) {
     const el = getWidgetEl(c.key);
+
+    if (!el) continue;
+
     el.innerHTML = widgetTemplate;
 
     const container = el.querySelector(".ava-widget-container");
     const agentImg = el.querySelector(".ava-agent-talking img");
     const stateContainer = el.querySelector(".ava-state-container");
     const rippleContainer = el.querySelector(".ripple-container");
+    const quietImg = el.querySelector(".ava-quiet");
 
     agentImg.src = c.agent_image;
     stateContainer.style.background = c.bgColor;
@@ -104,6 +109,12 @@ async function scanForWidgets() {
 
     if (c.speakingAnimation) {
       rippleContainer.style.display = "block";
+    }
+
+    if (c.idleIconUrl) {
+      quietImg.src = c.idleIconUrl;
+    } else {
+      quietImg.src = micSvg;
     }
 
     state[c.key] = {};
