@@ -24,12 +24,20 @@ const getDefaultApiHeaders = (apiKey) => ({
   ...(apiKey && { Authorization: `Bearer ${apiKey}` }),
 });
 
+window.widgetLib = {};
+
+window.widgetLib.scanWidgets = function () {
+  scanForWidgets().finally(() => {
+    state.isScanning = false;
+  });
+};
+
 function $(q, all) {
   return all ? document.querySelectorAll(q) : document.querySelector(q);
 }
 
-function getWidgetEl(apiKey) {
-  return $(`[${divAttrName}="${apiKey}"]`);
+function getWidgetEl(apiKey, all) {
+  return $(`[${divAttrName}="${apiKey}"]`, all);
 }
 
 async function setupObserver() {
@@ -56,9 +64,15 @@ async function scanForWidgets() {
 
   const widgets = $(`[${divAttrName}]`, true);
 
-  const apiKeys = Array.from(widgets, (el) =>
-    el.getAttribute(divAttrName)
-  ).filter((k) => !(k in state) && !!k);
+  // console.log({ widgets });
+
+  const apiKeys = [
+    ...new Set(
+      Array.from(widgets, (el) => el.getAttribute(divAttrName)).filter(
+        (k) => k && !(k in state)
+      )
+    ),
+  ];
 
   const promises = apiKeys.map((k) => getWidgetConfig(k));
 
@@ -79,50 +93,52 @@ async function scanForWidgets() {
   // console.log({ apiKeys, results, configs });
 
   for (const c of configs) {
-    const el = getWidgetEl(c.key);
+    const els = getWidgetEl(c.key, true);
 
-    if (!el) continue;
+    for (const el of els) {
+      if (!el) continue;
 
-    el.innerHTML = widgetTemplate;
+      el.innerHTML = widgetTemplate;
 
-    const container = el.querySelector(".ava-widget-container");
-    const agentImg = el.querySelector(".ava-agent-talking img");
-    const stateContainer = el.querySelector(".ava-state-container");
-    const rippleContainer = el.querySelector(".ripple-container");
-    const quietImg = el.querySelector(".ava-quiet");
+      const container = el.querySelector(".ava-widget-container");
+      const agentImg = el.querySelector(".ava-agent-talking img");
+      const stateContainer = el.querySelector(".ava-state-container");
+      const rippleContainer = el.querySelector(".ripple-container");
+      const quietImg = el.querySelector(".ava-quiet");
 
-    agentImg.src = c.agent_image;
-    stateContainer.style.background = c.bgColor;
+      agentImg.src = c.agent_image;
+      stateContainer.style.background = c.bgColor;
 
-    container.style.maxWidth = "120px";
-    container.style.maxHeight = "120px";
+      container.style.maxWidth = "120px";
+      container.style.maxHeight = "120px";
 
-    if (c.size === "medium") {
-      container.style.maxWidth = "220px";
-      container.style.maxHeight = "220px";
+      if (c.size === "medium") {
+        container.style.maxWidth = "220px";
+        container.style.maxHeight = "220px";
+      }
+
+      if (c.size === "large") {
+        container.style.maxWidth = "350px";
+        container.style.maxHeight = "350px";
+      }
+
+      if (c.speakingAnimation) {
+        rippleContainer.style.display = "block";
+      }
+
+      if (c.idleIconUrl) {
+        quietImg.src = c.idleIconUrl;
+      } else {
+        quietImg.src = micSvg;
+      }
+
+      state[c.key] = {};
+      state[c.key].callInProgress = false;
+
+      container.addEventListener("click", onPlayClicked(c.key));
+
+      container.style.display = "flex";
     }
-
-    if (c.size === "large") {
-      container.style.maxWidth = "350px";
-      container.style.maxHeight = "350px";
-    }
-
-    if (c.speakingAnimation) {
-      rippleContainer.style.display = "block";
-    }
-
-    if (c.idleIconUrl) {
-      quietImg.src = c.idleIconUrl;
-    } else {
-      quietImg.src = micSvg;
-    }
-
-    state[c.key] = {};
-    state[c.key].callInProgress = false;
-
-    container.addEventListener("click", onPlayClicked(c.key));
-
-    container.style.display = "block";
   }
 }
 
@@ -143,23 +159,22 @@ async function getWidgetConfig(apiKey) {
 }
 
 function onPlayClicked(apiKey) {
-  return () => {
+  return (event) => {
     const callState = state[apiKey];
 
     if (callState.callInProgress) {
       callState.callInstance.stop();
-      callState.callInProgress = false;
     } else if (!callState.isLoading) {
-      startCall(apiKey);
+      startCall(apiKey, event.currentTarget);
     }
   };
 }
 
-function onAgentStartTalking(apiKey) {
+function onAgentStartTalking(apiKey, targetEl) {
   return () => {
     // console.log("agent is talking");
     const callState = state[apiKey];
-    const el = getWidgetEl(apiKey);
+    const el = targetEl;
 
     const agentImg = el.querySelector(".ava-agent-talking");
 
@@ -174,37 +189,45 @@ function onAgentStartTalking(apiKey) {
   };
 }
 
-function onAgentStopTalking(apiKey) {
+function onAgentStopTalking(apiKey, targetEl) {
   return () => {
     // console.log("agent stopped talking");
     const callState = state[apiKey];
-    const el = getWidgetEl(apiKey);
+    const el = targetEl;
+
     const agentImg = el.querySelector(".ava-agent-talking");
     const userEl = el.querySelector(".ava-user-talking");
 
     callState.notTalkingTimeoutID = setTimeout(() => {
+      if (!callState.callInProgress) return;
       agentImg.style.display = "none";
       userEl.style.display = "flex";
     }, 1000);
   };
 }
 
-function onCallEnded(apiKey) {
+function onCallEnded(apiKey, targetEl) {
   return () => {
-    const el = getWidgetEl(apiKey);
+    const el = targetEl;
+    const callState = state[apiKey];
     const agentImg = el.querySelector(".ava-agent-talking");
     const userEl = el.querySelector(".ava-user-talking");
     const quietEl = el.querySelector(".ava-quiet");
+    const loadingEl = el.querySelector(".ava-loading");
 
+    callState.callInProgress = false;
+
+    loadingEl.style.display = "none";
     agentImg.style.display = "none";
     userEl.style.display = "none";
     quietEl.style.display = "block";
   };
 }
 
-function onCallStarted(apiKey) {
+function onCallStarted(apiKey, targetEl) {
   return () => {
-    const el = getWidgetEl(apiKey);
+    const el = targetEl;
+
     const agentImg = el.querySelector(".ava-agent-talking");
     const loadingEl = el.querySelector(".ava-loading");
 
@@ -215,10 +238,10 @@ function onCallStarted(apiKey) {
   };
 }
 
-async function startCall(apiKey) {
+async function startCall(apiKey, targetEl) {
   state[apiKey].isLoading = true;
 
-  const el = getWidgetEl(apiKey);
+  const el = targetEl;
 
   const quietEl = el.querySelector(".ava-quiet");
   const loadingEl = el.querySelector(".ava-loading");
@@ -244,10 +267,10 @@ async function startCall(apiKey) {
   const accessToken = res.access_token;
 
   const call = new CallManager(accessToken, {
-    onCallStarted: onCallStarted(apiKey),
-    onCallEnded: onCallEnded(apiKey),
-    onAgentStartTalking: onAgentStartTalking(apiKey),
-    onAgentStopTalking: onAgentStopTalking(apiKey),
+    onCallStarted: onCallStarted(apiKey, targetEl),
+    onCallEnded: onCallEnded(apiKey, targetEl),
+    onAgentStartTalking: onAgentStartTalking(apiKey, targetEl),
+    onAgentStopTalking: onAgentStopTalking(apiKey, targetEl),
   });
 
   call.start();

@@ -18,7 +18,6 @@
 }
 
 .ava-user-talking {
-  /* display: flex; */
   justify-content: center;
   align-items: center;
   width: 100%;
@@ -27,6 +26,9 @@
 
 .ava-widget-container {
   display: none;
+  justify-content: center;
+  align-items: center;
+  margin: 0 auto;
   position: relative;
   aspect-ratio: 1 / 1;
   min-height: 50px;
@@ -42,6 +44,7 @@
 }
 
 .ava-state-container {
+  width: 100%;
   background: linear-gradient(to right, rgb(234, 89, 115), rgb(168, 52, 176));
   height: 100%;
   border-radius: 50%;
