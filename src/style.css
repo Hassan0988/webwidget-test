@@ -45,8 +45,8 @@
 
 .ava-state-container {
   width: 100%;
+  aspect-ratio: 1 / 1;
   background: linear-gradient(to right, rgb(234, 89, 115), rgb(168, 52, 176));
-  height: 100%;
   border-radius: 50%;
   display: flex;
   justify-content: center;

@@ -14,7 +14,7 @@ export default defineConfig({
         main: resolve(__dirname, "src/main.js"),
       },
       output: {
-        entryFileNames: "web-widget.js", // Output file name
+        entryFileNames: "web-widget-staging.js", // Output file name
         format: "iife", // Immediately Invoked Function Expression
       },
     },
