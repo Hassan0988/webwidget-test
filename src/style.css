@@ -63,7 +63,7 @@
 
 .ava-quiet {
   width: 100%;
-  max-width: 30%;
+  max-width: 30% !important;
   transition: transform 0.3s;
   transform: scale(1);
 }
