@@ -239,6 +239,10 @@ function onCallStarted(apiKey, targetEl) {
 }
 
 async function startCall(apiKey, targetEl) {
+  const hasMicPermission = await checkMicrophonePermission()
+
+  if(!hasMicPermission) return
+  
   state[apiKey].isLoading = true;
 
   const el = targetEl;
@@ -280,4 +284,41 @@ async function startCall(apiKey, targetEl) {
   state[apiKey].isLoading = false;
 
   // console.log({ call });
+}
+
+async function checkMicrophonePermission() {
+  try {
+    let permissionStatus;
+
+    try {
+      permissionStatus = await navigator.permissions.query({ name: 'microphone' });
+
+    } catch (e) {
+      console.log('Permissions API not supported, proceeding with getUserMedia');
+    }
+
+    if (permissionStatus?.state === 'granted') {
+      return true;
+    }
+
+    if (permissionStatus?.state === 'denied') {
+      console.log('Microphone access was denied - please reset permission in browser settings');
+      alert('Microphone permission was denied. Please reset the permission in your browser settings to try again.');
+      return false;
+    }
+
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    stream.getTracks().forEach(track => track.stop());
+    return true;
+  } catch (error) {
+    console.error('Error accessing microphone:', error);
+    
+    if (error.name === 'NotAllowedError') {
+      alert('Microphone access was denied. Please reset the permission in your browser settings to try again.');
+    } else {
+      alert('Error accessing microphone: ' + error.message);
+    }
+    
+    return false;
+  }
 }
