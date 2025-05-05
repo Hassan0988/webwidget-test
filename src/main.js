@@ -221,6 +221,13 @@ function onCallEnded(apiKey, targetEl) {
     agentImg.style.display = "none";
     userEl.style.display = "none";
     quietEl.style.display = "block";
+
+    try{
+      audioStream.getTracks().forEach(track => track.stop());
+    } catch {
+      console.log("Couldn't stop audio streams!")
+    }
+
   };
 }
 
@@ -286,6 +293,8 @@ async function startCall(apiKey, targetEl) {
   // console.log({ call });
 }
 
+var audioStream = null;
+
 async function checkMicrophonePermission() {
   try {
     let permissionStatus;
@@ -307,8 +316,7 @@ async function checkMicrophonePermission() {
       return false;
     }
 
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    stream.getTracks().forEach(track => track.stop());
+    audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
     return true;
   } catch (error) {
     console.error('Error accessing microphone:', error);
