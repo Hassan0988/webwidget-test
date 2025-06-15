@@ -131,6 +131,8 @@ async function scanForWidgets() {
       } else {
         quietImg.src = micSvg;
       }
+      // Apply new configuration options
+      applyModeAndJustification(el, container, c);
 
       state[c.key] = {};
       state[c.key].callInProgress = false;
@@ -138,6 +140,63 @@ async function scanForWidgets() {
       container.addEventListener("click", onPlayClicked(c.key));
 
       container.style.display = "flex";
+    }
+  }
+}
+
+function applyModeAndJustification(el, container, config) {
+  const mode = config.mode || "embedded"; // default to embedded
+  const justification = config.justification || "center"; // default to center
+  if (mode === "overlay") {
+    el.style.position = "fixed";
+    el.style.zIndex = "9999";
+    el.style.bottom = "20px";
+    switch (justification) {
+      case "left":
+        el.style.left = "20px";
+        break;
+      case "right":
+        el.style.right = "20px";
+        break;
+      case "center":
+      default:
+        el.style.left = "50%";
+        el.style.right = "50%";
+        break;
+    }
+
+    // Remove any existing positioning classes/styles that might interfere
+    el.style.position = "fixed";
+    el.style.transform = "none";
+    el.style.margin = "0";
+  } else {
+    // Embedded mode - apply justification
+    el.style.position = "relative";
+    el.style.zIndex = "auto";
+    el.style.bottom = "auto";
+    el.style.left = "auto";
+    el.style.right = "auto";
+    el.style.transform = "none";
+    el.style.margin = "0";
+    
+    // Make sure the element takes full width of its container
+    el.style.width = "100%";
+    
+    // Apply justification for embedded mode
+    switch (justification) {
+      case "left":
+        el.style.display = "flex";
+        el.style.justifyContent = "flex-start";
+        break;
+      case "right":
+        el.style.display = "flex";
+        el.style.justifyContent = "flex-end";
+        break;
+      case "center":
+      default:
+        el.style.display = "flex";
+        el.style.justifyContent = "center";
+        break;
     }
   }
 }
