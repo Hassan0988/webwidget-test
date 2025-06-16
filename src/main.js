@@ -89,10 +89,12 @@ async function scanForWidgets() {
       }
     })
     .filter(Boolean);
+  applyConfigSettings(configs);
 
-  // console.log({ apiKeys, results, configs });
+}
 
-  for (const c of configs) {
+function applyConfigSettings(configs) {
+    for (const c of configs) {
     const els = getWidgetEl(c.key, true);
 
     for (const el of els) {
@@ -132,21 +134,8 @@ async function scanForWidgets() {
         quietImg.src = micSvg;
       }
       // Apply new configuration options
-      applyModeAndJustification(el, container, c);
-
-      state[c.key] = {};
-      state[c.key].callInProgress = false;
-
-      container.addEventListener("click", onPlayClicked(c.key));
-
-      container.style.display = "flex";
-    }
-  }
-}
-
-function applyModeAndJustification(el, container, config) {
-  const mode = config.mode || "embedded"; // default to embedded
-  const justification = config.justification || "center"; // default to center
+    const mode = c.mode || "embedded"; // default to embedded
+  const justification = c.justification || "center"; // default to center
   if (mode === "overlay") {
     el.style.position = "fixed";
     el.style.zIndex = "9999";
@@ -199,6 +188,16 @@ function applyModeAndJustification(el, container, config) {
         break;
     }
   }
+
+      state[c.key] = {};
+      state[c.key].callInProgress = false;
+
+      container.addEventListener("click", onPlayClicked(c.key));
+
+      container.style.display = "flex";
+    }
+  
+    }
 }
 
 async function getWidgetConfig(apiKey) {
