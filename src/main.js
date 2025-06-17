@@ -133,61 +133,69 @@ function applyConfigSettings(configs) {
       } else {
         quietImg.src = micSvg;
       }
+      
       // Apply new configuration options
-    const mode = c.mode || "embedded"; // default to embedded
-  const justification = c.justification || "center"; // default to center
-  if (mode === "overlay") {
-    el.style.position = "fixed";
-    el.style.zIndex = "9999";
-    el.style.bottom = "20px";
-    switch (justification) {
-      case "left":
-        el.style.left = "20px";
-        break;
-      case "right":
-        el.style.right = "20px";
-        break;
-      case "center":
-      default:
-        el.style.left = "50%";
-        el.style.right = "50%";
-        break;
-    }
-
-    // Remove any existing positioning classes/styles that might interfere
-    el.style.position = "fixed";
-    el.style.transform = "none";
-    el.style.margin = "0";
-  } else {
-    // Embedded mode - apply justification
-    el.style.position = "relative";
-    el.style.zIndex = "auto";
-    el.style.bottom = "auto";
-    el.style.left = "auto";
-    el.style.right = "auto";
-    el.style.transform = "none";
-    el.style.margin = "0";
-    
-    // Make sure the element takes full width of its container
-    el.style.width = "100%";
-    
-    // Apply justification for embedded mode
-    switch (justification) {
-      case "left":
-        el.style.display = "flex";
-        el.style.justifyContent = "flex-start";
-        break;
-      case "right":
-        el.style.display = "flex";
-        el.style.justifyContent = "flex-end";
-        break;
-      case "center":
-      default:
-        el.style.display = "flex";
-        el.style.justifyContent = "center";
-        break;
-    }
-  }
+      const mode = c.mode || "embedded"; // default to embedded
+      const justification = c.justification || "center"; // default to center
+      
+      if (mode === "overlay") {
+        el.style.position = "fixed";
+        el.style.zIndex = "9999";
+        el.style.bottom = "20px";
+        
+        // Reset any conflicting styles
+        el.style.margin = "0";
+        el.style.width = "auto";
+        el.style.display = "block";
+        
+        switch (justification) {
+          case "left":
+            el.style.left = "20px";
+            el.style.right = "auto";
+            el.style.transform = "none";
+            break;
+          case "right":
+            el.style.right = "20px";
+            el.style.left = "auto";
+            el.style.transform = "none";
+            break;
+          case "center":
+          default:
+            el.style.left = "50%";
+            el.style.right = "auto";
+            el.style.transform = "translateX(-50%)";
+            break;
+        }
+      } else {
+        // Embedded mode - apply justification
+        el.style.position = "relative";
+        el.style.zIndex = "auto";
+        el.style.bottom = "auto";
+        el.style.left = "auto";
+        el.style.right = "auto";
+        el.style.transform = "none";
+        el.style.margin = "0";
+        
+        // Make sure the element takes full width of its container
+        el.style.width = "100%";
+        
+        // Apply justification for embedded mode
+        switch (justification) {
+          case "left":
+            el.style.display = "flex";
+            el.style.justifyContent = "flex-start";
+            break;
+          case "right":
+            el.style.display = "flex";
+            el.style.justifyContent = "flex-end";
+            break;
+          case "center":
+          default:
+            el.style.display = "flex";
+            el.style.justifyContent = "center";
+            break;
+        }
+      }
 
       state[c.key] = {};
       state[c.key].callInProgress = false;
@@ -196,8 +204,7 @@ function applyConfigSettings(configs) {
 
       container.style.display = "flex";
     }
-  
-    }
+  }
 }
 
 async function getWidgetConfig(apiKey) {
