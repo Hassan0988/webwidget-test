@@ -1,5 +1,5 @@
 import widgetTemplate from "@/widget-template.html?raw";
-import { CallManager } from "@/retell";
+import { CallManager } from "@/call.lib";
 import micSvg from "./mic.svg";
 import "./style.css";
 
@@ -222,7 +222,7 @@ function onCallEnded(apiKey, targetEl) {
     userEl.style.display = "none";
     quietEl.style.display = "block";
 
-    try{
+    try {
       audioStream.getTracks().forEach(track => track.stop());
     } catch {
       console.log("Couldn't stop audio streams!")
@@ -248,8 +248,8 @@ function onCallStarted(apiKey, targetEl) {
 async function startCall(apiKey, targetEl) {
   const hasMicPermission = await checkMicrophonePermission()
 
-  if(!hasMicPermission) return
-  
+  if (!hasMicPermission) return
+
   state[apiKey].isLoading = true;
 
   const el = targetEl;
@@ -320,13 +320,13 @@ async function checkMicrophonePermission() {
     return true;
   } catch (error) {
     console.error('Error accessing microphone:', error);
-    
+
     if (error.name === 'NotAllowedError') {
       alert('Microphone access was denied. Please reset the permission in your browser settings to try again.');
     } else {
       alert('Error accessing microphone: ' + error.message);
     }
-    
+
     return false;
   }
 }

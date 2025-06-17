@@ -1,4 +1,4 @@
-import { RetellWebClient } from "retell-client-js-sdk";
+import { WebCallClient } from "webcall-sdk";
 
 interface CallCallbacks {
   onCallStarted?: () => void;
@@ -10,14 +10,14 @@ interface CallCallbacks {
 }
 
 export class CallManager {
-  private client: RetellWebClient;
+  private client: WebCallClient;
   private callbacks: CallCallbacks;
 
   constructor(
     private readonly accessToken: string,
     callbacks: CallCallbacks = {}
   ) {
-    this.client = new RetellWebClient();
+    this.client = new WebCallClient();
     this.callbacks = callbacks;
     this.setupEventListeners();
   }

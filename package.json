@@ -9,7 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "retell-client-js-sdk": "^2.0.0"
+    "webcall-sdk": "github:idealinks/webcall-sdk"
   },
   "devDependencies": {
     "typescript": "~5.7.2",

@@ -8,10 +8,13 @@ importers:
 
   .:
     dependencies:
-      retell-client-js-sdk:
-        specifier: ^2.0.0
-        version: 2.0.5
+      webcall-sdk:
+        specifier: github:idealinks/webcall-sdk
+        version: https://codeload.github.com/idealinks/webcall-sdk/tar.gz/c43c23292e6b29b3f7ce2ef2a3c7bbfeaa166f7c
     devDependencies:
+      typescript:
+        specifier: ~5.7.2
+        version: 5.7.3
       vite:
         specifier: ^6.1.0
         version: 6.1.0
@@ -311,9 +314,6 @@ packages:
     resolution: {integrity: sha512-MjOadfU3Ys9KYoX0AdkBlFEF1Vx37uCCeN4ZHnmwm9FfpbsGWMZeBLMmmpY+6Ocqod7mkdZ0DT31OlbsFrLlkA==}
     engines: {node: ^10 || ^12 || >=14}
 
-  retell-client-js-sdk@2.0.5:
-    resolution: {integrity: sha512-72iH9kHHJjCj2tZOj3VvHaJATgk3FxDQLgnSMvn5Vh7qkMAjsE25mEjxwM23ZCHF0Cb+UnLN5jL5wtY78bXavg==}
-
   rollup@4.34.6:
     resolution: {integrity: sha512-wc2cBWqJgkU3Iz5oztRkQbfVkbxoz5EhnCGOrnJvnLnQ7O0WhQUYyv18qQI79O8L7DdHrrlJNeCHd4VGpnaXKQ==}
     engines: {node: '>=18.0.0', npm: '>=8.0.0'}
@@ -341,6 +341,11 @@ packages:
 
   typed-emitter@2.1.0:
     resolution: {integrity: sha512-g/KzbYKbH5C2vPkaXGu8DJlHrGKHLsM25Zg9WuC9pMGfuvT+X25tZQWo5fK1BjBm8+UrVE9LDCvaY0CQk+fXDA==}
+
+  typescript@5.7.3:
+    resolution: {integrity: sha512-84MVSjMEHP+FQRPy3pX9sTVV/INIex71s9TL2Gm5FG/WG1SqXeKyZ0k7/blY/4FdOzI12CBy1vGc4og/eus0fw==}
+    engines: {node: '>=14.17'}
+    hasBin: true
 
   vite@6.1.0:
     resolution: {integrity: sha512-RjjMipCKVoR4hVfPY6GQTgveinjNuyLw+qruksLDvA5ktI1150VmcMBKmQaEWJhg/j6Uaf6dNCNA0AfdzUb/hQ==}
@@ -381,6 +386,10 @@ packages:
         optional: true
       yaml:
         optional: true
+
+  webcall-sdk@https://codeload.github.com/idealinks/webcall-sdk/tar.gz/c43c23292e6b29b3f7ce2ef2a3c7bbfeaa166f7c:
+    resolution: {tarball: https://codeload.github.com/idealinks/webcall-sdk/tar.gz/c43c23292e6b29b3f7ce2ef2a3c7bbfeaa166f7c}
+    version: 2.0.7
 
   webrtc-adapter@9.0.1:
     resolution: {integrity: sha512-1AQO+d4ElfVSXyzNVTOewgGT/tAomwwztX/6e3totvyyzXPvXIIuUUjAmyZGbKBKbZOXauuJooZm3g6IuFuiNQ==}
@@ -589,11 +598,6 @@ snapshots:
       picocolors: 1.1.1
       source-map-js: 1.2.1
 
-  retell-client-js-sdk@2.0.5:
-    dependencies:
-      eventemitter3: 5.0.1
-      livekit-client: 2.9.1
-
   rollup@4.34.6:
     dependencies:
       '@types/estree': 1.0.6
@@ -638,6 +642,8 @@ snapshots:
     optionalDependencies:
       rxjs: 7.8.1
 
+  typescript@5.7.3: {}
+
   vite@6.1.0:
     dependencies:
       esbuild: 0.24.2
@@ -645,6 +651,11 @@ snapshots:
       rollup: 4.34.6
     optionalDependencies:
       fsevents: 2.3.3
+
+  webcall-sdk@https://codeload.github.com/idealinks/webcall-sdk/tar.gz/c43c23292e6b29b3f7ce2ef2a3c7bbfeaa166f7c:
+    dependencies:
+      eventemitter3: 5.0.1
+      livekit-client: 2.9.1
 
   webrtc-adapter@9.0.1:
     dependencies:
