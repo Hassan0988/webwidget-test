@@ -112,16 +112,13 @@ function applyConfigSettings(configs) {
       stateContainer.style.background = c.bgColor;
 
       container.style.width = "120px";
-      container.style.height = "120px";
-console.log('c', c)
+      container.style.height = "auto";
       if (c.size === "medium") {
         container.style.width = "220px";
-        container.style.height = "220px";
       }
 
       if (c.size === "large") {
         container.style.width = "350px";
-        container.style.height = "350px";
       }
 
       if (c.speakingAnimation) {
