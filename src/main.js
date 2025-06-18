@@ -111,17 +111,17 @@ function applyConfigSettings(configs) {
       agentImg.src = c.agent_image;
       stateContainer.style.background = c.bgColor;
 
-      container.style.maxWidth = "120px";
-      container.style.maxHeight = "120px";
-
+      container.style.width = "120px";
+      container.style.height = "120px";
+console.log('c', c)
       if (c.size === "medium") {
-        container.style.maxWidth = "220px";
-        container.style.maxHeight = "220px";
+        container.style.width = "220px";
+        container.style.height = "220px";
       }
 
       if (c.size === "large") {
-        container.style.maxWidth = "350px";
-        container.style.maxHeight = "350px";
+        container.style.width = "350px";
+        container.style.height = "350px";
       }
 
       if (c.speakingAnimation) {
