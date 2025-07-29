@@ -64,8 +64,6 @@ async function scanForWidgets() {
 
   const widgets = $(`[${divAttrName}]`, true);
 
-  // console.log({ widgets });
-
   const apiKeys = [
     ...new Set(
       Array.from(widgets, (el) => el.getAttribute(divAttrName)).filter(
@@ -91,7 +89,6 @@ async function scanForWidgets() {
     .filter(Boolean);
 
   setupWidgets(configs);
-
 }
 
 function setupWidgets(configs) {
@@ -104,44 +101,57 @@ function setupWidgets(configs) {
       el.innerHTML = widgetTemplate;
 
       const container = el.querySelector(".wcw-widget-container");
-      const agentImg = el.querySelector(".wcw-agent-talking img");
       const stateContainer = el.querySelector(".wcw-state-container");
-      const rippleContainer = el.querySelector(".ripple-container");
+      const agentImg = el.querySelector(".wcw-agent-talking img");
       const quietImg = el.querySelector(".wcw-quiet");
+      const textContainer = el.querySelector(".wcw-text-container");
+      const titleEl = el.querySelector(".wcw-title");
+      const subtextEl = el.querySelector(".wcw-subtext");
+      // const rippleContainer = el.querySelector(".ripple-container");
 
-      agentImg.src = c.agent_image;
-      stateContainer.style.background = c.bgColor;
-
-      container.style.width = "120px";
-      container.style.height = "auto";
-      if (c.size === "medium") {
-        container.style.width = "220px";
-      }
-
-      if (c.size === "large") {
-        container.style.width = "350px";
-      }
-
-      if (c.speakingAnimation) {
-        rippleContainer.style.display = "block";
-      }
-
-      if (c.idleIconUrl) {
-        quietImg.src = c.idleIconUrl;
-      } else {
-        quietImg.src = micSvg;
+      // Set agent image
+      if (c.agent_image && agentImg) {
+        agentImg.src = c.agent_image;
       }
       
-      // Apply new configuration options
-      const mode = c.mode || "embedded"; // default to embedded
-      const justification = c.justification || "center"; // default to center
+      // Set background color for state container and create CSS custom properties
+      if (c.bgColor) {
+        stateContainer.style.background = c.bgColor;
+        container.style.setProperty('--accent-color', c.bgColor);
+        
+        // Create shadow color with opacity
+        const shadowColor = hexToRgba(c.bgColor, 0.3);
+        container.style.setProperty('--accent-shadow', shadowColor);
+      }
+      
+      // Apply theme
+      const theme = c.theme || "light";
+      container.classList.add(`wcw-theme-${theme}`);
+
+      // Handle idle icon
+      if (c.idleIconUrl && quietImg) {
+        quietImg.src = c.idleIconUrl;
+      } else if (quietImg) {
+        quietImg.src = micSvg;
+      }
+
+      // Handle text mode
+      if (c.textMode && c.default_text && textContainer && titleEl && subtextEl) {
+        container.classList.add("text-mode");
+        titleEl.textContent = c.default_text.title || "";
+        subtextEl.textContent = c.default_text.subtext || "";
+      } else {
+        container.classList.remove("text-mode");
+      }
+      
+      // Apply positioning configuration
+      const mode = c.mode || "embedded";
+      const justification = c.justification || "center";
       
       if (mode === "overlay") {
         el.style.position = "fixed";
         el.style.zIndex = "9999";
         el.style.bottom = "20px";
-        
-        // Reset any conflicting styles
         el.style.margin = "0";
         el.style.width = "auto";
         el.style.display = "block";
@@ -165,7 +175,7 @@ function setupWidgets(configs) {
             break;
         }
       } else {
-        // Embedded mode - apply justification
+        // Embedded mode
         el.style.position = "relative";
         el.style.zIndex = "auto";
         el.style.bottom = "auto";
@@ -173,11 +183,8 @@ function setupWidgets(configs) {
         el.style.right = "auto";
         el.style.transform = "none";
         el.style.margin = "0";
-        
-        // Make sure the element takes full width of its container
         el.style.width = "100%";
         
-        // Apply justification for embedded mode
         switch (justification) {
           case "left":
             el.style.display = "flex";
@@ -197,12 +204,32 @@ function setupWidgets(configs) {
 
       state[c.key] = {};
       state[c.key].callInProgress = false;
+      state[c.key].config = c; // Store the config for later use
 
       container.addEventListener("click", onPlayClicked(c.key));
 
       container.style.display = "flex";
     }
   }
+}
+
+// Helper function to convert hex color to rgba
+function hexToRgba(hex, alpha) {
+  if (!hex) return 'rgba(255, 107, 157, 0.3)';
+  
+  // Remove # if present
+  hex = hex.replace('#', '');
+  
+  // Convert 3-digit hex to 6-digit
+  if (hex.length === 3) {
+    hex = hex.split('').map(char => char + char).join('');
+  }
+  
+  const r = parseInt(hex.slice(0, 2), 16);
+  const g = parseInt(hex.slice(2, 4), 16);
+  const b = parseInt(hex.slice(4, 6), 16);
+  
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
 
 async function getWidgetConfig(apiKey) {
@@ -235,75 +262,145 @@ function onPlayClicked(apiKey) {
 
 function onAgentStartTalking(apiKey, targetEl) {
   return () => {
-    // console.log("agent is talking");
     const callState = state[apiKey];
-    const el = targetEl;
+    const container = targetEl;
 
-    const agentImg = el.querySelector(".wcw-agent-talking");
-
-    const userEl = el.querySelector(".wcw-user-talking");
-
+    const agentImg = container.querySelector(".wcw-agent-talking");
+    const userEl = container.querySelector(".wcw-user-talking");
+    const quietEl = container.querySelector(".wcw-quiet");
+    const rippleContainer = container.querySelector(".ripple-container");
+    const titleEl = container.querySelector(".wcw-title");
+    const subtextEl = container.querySelector(".wcw-subtext");
     clearTimeout(callState.notTalkingTimeoutID);
 
     callState.talkingTimeoutID = setTimeout(() => {
-      agentImg.style.display = "block";
-      userEl.style.display = "none";
+      if (agentImg) agentImg.style.display = "flex";
+      if (userEl) userEl.style.display = "none";
+      if (quietEl) quietEl.style.display = "none";
+
+      
+      // Show ripple animation only when speakingAnimation is true and not in text mode
+      if (!callState.config?.textMode && callState.config?.speakingAnimation && rippleContainer) {
+        rippleContainer.style.display = "block";
+      }
+      
+      // Update text content for text mode when agent is speaking
+      if (container.classList.contains("text-mode") && titleEl && subtextEl) {
+        titleEl.textContent = "Hello!";
+        subtextEl.textContent = "I'm your AI assistant";
+      }
+      
+      // Add agent speaking class for text mode styling
+      container.classList.add("agent-speaking");
+      const rgb = hexToRgb(callState.config?.bgColor);
+      container.style.boxShadow = `
+      0 0 12px rgba(${rgb}, 0.6),
+      0 0 24px rgba(${rgb}, 0.5),
+      0 0 48px rgba(${rgb}, 0.3)
+     `;
     }, 50);
   };
 }
 
 function onAgentStopTalking(apiKey, targetEl) {
   return () => {
-    // console.log("agent stopped talking");
     const callState = state[apiKey];
-    const el = targetEl;
+    const container = targetEl;
 
-    const agentImg = el.querySelector(".wcw-agent-talking");
-    const userEl = el.querySelector(".wcw-user-talking");
+    const agentImg = container.querySelector(".wcw-agent-talking");
+    const userEl = container.querySelector(".wcw-user-talking");
+    const quietEl = container.querySelector(".wcw-quiet");
+    const rippleContainer = container.querySelector(".ripple-container");
+    const titleEl = container.querySelector(".wcw-title");
+    const subtextEl = container.querySelector(".wcw-subtext");
 
     callState.notTalkingTimeoutID = setTimeout(() => {
       if (!callState.callInProgress) return;
-      agentImg.style.display = "none";
-      userEl.style.display = "flex";
+      
+      if (agentImg) agentImg.style.display = "none";
+      if (userEl) userEl.style.display = "flex";
+      if (quietEl) quietEl.style.display = "none";
+      
+      // Hide ripple animation only when speakingAnimation is true and not in text mode
+      if (!callState.config?.textMode && callState.config?.speakingAnimation && rippleContainer) {
+        rippleContainer.style.display = "none";
+      }
+      
+      // Update text content for text mode when agent is listening
+      if (container.classList.contains("text-mode") && callState.config?.textMode && titleEl && subtextEl) {
+        titleEl.textContent = "Talk to me!";
+        subtextEl.textContent = "Listening...";
+      }
+      
+      // Remove agent speaking class
+      container.classList.remove("agent-speaking");
+      container.style.boxShadow = null
     }, 1000);
   };
 }
 
 function onCallEnded(apiKey, targetEl) {
   return () => {
-    const el = targetEl;
+    const container = targetEl;
     const callState = state[apiKey];
-    const agentImg = el.querySelector(".wcw-agent-talking");
-    const userEl = el.querySelector(".wcw-user-talking");
-    const quietEl = el.querySelector(".wcw-quiet");
-    const loadingEl = el.querySelector(".wcw-loading");
+    const agentImg = container.querySelector(".wcw-agent-talking");
+    const userEl = container.querySelector(".wcw-user-talking");
+    const quietEl = container.querySelector(".wcw-quiet");
+    const loadingEl = container.querySelector(".wcw-loading");
+    const rippleContainer = container.querySelector(".ripple-container");
+    const titleEl = container.querySelector(".wcw-title");
+    const subtextEl = container.querySelector(".wcw-subtext");
 
     callState.callInProgress = false;
 
-    loadingEl.style.display = "none";
-    agentImg.style.display = "none";
-    userEl.style.display = "none";
-    quietEl.style.display = "block";
-
+    if (loadingEl) loadingEl.style.display = "none";
+    if (agentImg) agentImg.style.display = "none";
+    if (userEl) userEl.style.display = "none";
+    if (quietEl) quietEl.style.display = "block";
+    
+    // Hide ripple animation only when speakingAnimation is true and not in text mode
+    if (!callState.config?.textMode && callState.config?.speakingAnimation && rippleContainer) {
+      rippleContainer.style.display = "none";
+    }
+    
+    // Reset text content to original config values for text mode
+    if (callState.config?.textMode && titleEl && subtextEl && callState.config && callState.config.default_text) {
+      titleEl.textContent = callState.config.default_text.title || "";
+      subtextEl.textContent = callState.config.default_text.subtext || "";
+    }
+    
+    // Remove agent speaking class
+    container.classList.remove("agent-speaking");
+    container.style.boxShadow = null;
     try {
       audioStream.getTracks().forEach(track => track.stop());
     } catch {
       console.log("Couldn't stop audio streams!")
     }
-
   };
 }
 
 function onCallStarted(apiKey, targetEl) {
   return () => {
-    const el = targetEl;
+    const container = targetEl;
 
-    const agentImg = el.querySelector(".wcw-agent-talking");
-    const loadingEl = el.querySelector(".wcw-loading");
+    const agentImg = container.querySelector(".wcw-agent-talking");
+    const loadingEl = container.querySelector(".wcw-loading");
+    const quietEl = container.querySelector(".wcw-quiet");
+    const rippleContainer = container.querySelector(".ripple-container");
 
     setTimeout(() => {
-      loadingEl.style.display = "none";
-      agentImg.style.display = "block";
+      if (loadingEl) loadingEl.style.display = "none";
+      if (agentImg) agentImg.style.display = "flex";
+      if (quietEl) quietEl.style.display = "none";
+      
+      // Show ripple animation only when speakingAnimation is true and not in text mode
+      if (!callState.config?.textMode && callState.config?.speakingAnimation && rippleContainer) {
+        rippleContainer.style.display = "block";
+      }
+      
+      // Add agent speaking class for text mode styling
+      container.classList.add("agent-speaking");
     }, 500);
   };
 }
@@ -315,13 +412,18 @@ async function startCall(apiKey, targetEl) {
 
   state[apiKey].isLoading = true;
 
-  const el = targetEl;
+  const container = targetEl;
 
-  const quietEl = el.querySelector(".wcw-quiet");
-  const loadingEl = el.querySelector(".wcw-loading");
+  const quietEl = container.querySelector(".wcw-quiet");
+  const loadingEl = container.querySelector(".wcw-loading");
 
-  loadingEl.style.display = "block";
-  quietEl.style.display = "none";
+  if (loadingEl){ 
+    loadingEl.style.display = "flex";
+    loadingEl.style.justifyContent = "center";
+    loadingEl.style.alignItems = "center";
+
+  }
+  if (quietEl) quietEl.style.display = "none";
 
   const headers = getDefaultApiHeaders(apiKey);
 
@@ -335,8 +437,6 @@ async function startCall(apiKey, targetEl) {
   if (!req.ok) {
     throw new Error(`${req.status} ${req.statusText}`);
   }
-
-  // console.log(res);
 
   const accessToken = res.access_token;
 
@@ -352,8 +452,6 @@ async function startCall(apiKey, targetEl) {
   state[apiKey].callInProgress = true;
   state[apiKey].callInstance = call;
   state[apiKey].isLoading = false;
-
-  // console.log({ call });
 }
 
 var audioStream = null;
@@ -364,7 +462,6 @@ async function checkMicrophonePermission() {
 
     try {
       permissionStatus = await navigator.permissions.query({ name: 'microphone' });
-
     } catch (e) {
       console.log('Permissions API not supported, proceeding with getUserMedia');
     }
@@ -392,4 +489,15 @@ async function checkMicrophonePermission() {
 
     return false;
   }
+}
+
+function hexToRgb(hex) {
+  hex = hex.replace("#", "");
+  if (hex.length === 3) {
+    hex = hex.split("").map(c => c + c).join(""); // Convert shorthand #abc → #aabbcc
+  }
+  const r = parseInt(hex.slice(0, 2), 16);
+  const g = parseInt(hex.slice(2, 4), 16);
+  const b = parseInt(hex.slice(4, 6), 16);
+  return `${r}, ${g}, ${b}`; // returns "173, 61, 225"
 }

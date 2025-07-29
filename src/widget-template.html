@@ -1,59 +1,31 @@
 <div class="wcw-widget-container">
-  <div id="playButton" class="wcw-state-container">
-    <img src="" alt="" srcset="" class="wcw-quiet" />
-
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width="50"
-      height="50"
-      viewBox="0 0 50 50"
-      class="wcw-loading"
-    >
-      <circle
-        cx="25"
-        cy="25"
-        r="20"
-        fill="none"
-        stroke="white"
-        stroke-width="4"
-        stroke-linecap="round"
-        stroke-dasharray="100"
-        stroke-dashoffset="0"
-      >
-        <animate
-          attributeName="stroke-dashoffset"
-          from="0"
-          to="-200"
-          dur="1.5s"
-          repeatCount="indefinite"
-        />
-        <animate
-          attributeName="stroke-dasharray"
-          values="1,100;89,100;1,100"
-          dur="1.5s"
-          repeatCount="indefinite"
-        />
-      </circle>
-    </svg>
-
-    <div class="wcw-agent-talking">
-      <div class="agent-img-container">
-        <img src="" alt="Agenct Img" />
-      </div>
-      <div class="ripple-container">
-        <div class="ripple ripple-1"></div>
-        <div class="ripple ripple-2"></div>
-        <div class="ripple ripple-3"></div>
-      </div>
+  <div class="wcw-text-container">
+    <div class="wcw-title"></div>
+    <div class="wcw-subtext"></div>
+  </div>
+  
+  <div class="wcw-state-container">
+    <img class="wcw-quiet" src="" alt="Microphone" />
+    
+    <div class="wcw-loading" style="display: none;">
+      <div class="loading-spinner"></div>
     </div>
-
-    <div class="wcw-user-talking">
-      <div class="wave-bar" style="animation-delay: 0s"></div>
-      <div class="wave-bar" style="animation-delay: 0.2s"></div>
-      <div class="wave-bar" style="animation-delay: 0.4s"></div>
-      <div class="wave-bar" style="animation-delay: 0.6s"></div>
-      <div class="wave-bar" style="animation-delay: 0.8s"></div>
-      <div class="wave-bar" style="animation-delay: 0.99s"></div>
+    
+    <div class="wcw-agent-talking" style="display: none;">
+      <img src="" alt="Agent" />
+    </div>
+    
+    <div class="wcw-user-talking" style="display: none;">
+      <div class="wave-bar" style="animation-delay: 0s;"></div>
+      <div class="wave-bar" style="animation-delay: 0.1s;"></div>
+      <div class="wave-bar" style="animation-delay: 0.2s;"></div>
+      <div class="wave-bar" style="animation-delay: 0.3s;"></div>
+    </div>
+    
+    <div class="ripple-container">
+      <div class="ripple ripple-1"></div>
+      <div class="ripple ripple-2"></div>
+      <div class="ripple ripple-3"></div>
     </div>
   </div>
 </div>
