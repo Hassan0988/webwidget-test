@@ -92,6 +92,7 @@ async function scanForWidgets() {
 }
 
 function setupWidgets(configs) {
+  console.log(configs)
   for (const c of configs) {
     const els = getWidgetEl(c.key, true);
 
@@ -107,13 +108,14 @@ function setupWidgets(configs) {
       const textContainer = el.querySelector(".wcw-text-container");
       const titleEl = el.querySelector(".wcw-title");
       const subtextEl = el.querySelector(".wcw-subtext");
+      
       // const rippleContainer = el.querySelector(".ripple-container");
 
       // Set agent image
       if (c.agent_image && agentImg) {
+        agentImg.src = ''; // force reflow
         agentImg.src = c.agent_image;
-      }
-      
+    }
       // Set background color for state container and create CSS custom properties
       if (c.bgColor) {
         stateContainer.style.background = c.bgColor;
@@ -138,10 +140,32 @@ function setupWidgets(configs) {
       // Handle text mode
       if (c.textMode && c.default_text && textContainer && titleEl && subtextEl) {
         container.classList.add("text-mode");
+        container.classList.add("idle"); // Add idle class for text mode
         titleEl.textContent = c.default_text.title || "";
         subtextEl.textContent = c.default_text.subtext || "";
       } else {
         container.classList.remove("text-mode");
+        container.classList.remove("idle");
+        container.style.width = "auto";
+        container.style.height = "auto";
+        // Apply size configuration for non-text mode widgets
+        const size = c.size 
+        if (size === "small") {
+          quietImg.style.width = "28px";
+          quietImg.style.height = "28px";
+          stateContainer.style.width = "120px";
+          stateContainer.style.height = "120px";
+        } else if (size === "medium") {
+          stateContainer.style.width = "220px";
+          stateContainer.style.height = "220px";
+          quietImg.style.width = "38px";
+          quietImg.style.height = "38px";
+        } else if (size === "large") {
+          stateContainer.style.width = "350px";
+          stateContainer.style.height = "350px";
+          quietImg.style.width = "48px";
+          quietImg.style.height = "48px";
+        }
       }
       
       // Apply positioning configuration
@@ -292,6 +316,12 @@ function onAgentStartTalking(apiKey, targetEl) {
       
       // Add agent speaking class for text mode styling
       container.classList.add("agent-speaking");
+      
+      // Remove idle class when agent starts talking for text mode
+      if (callState.config?.textMode) {
+        container.classList.remove("idle");
+      }
+      
       const rgb = hexToRgb(callState.config?.bgColor);
       container.style.boxShadow = `
       0 0 12px rgba(${rgb}, 0.6),
@@ -334,7 +364,8 @@ function onAgentStopTalking(apiKey, targetEl) {
       
       // Remove agent speaking class
       container.classList.remove("agent-speaking");
-      container.style.boxShadow = null
+      container.style.boxShadow = null;
+      
     }, 1000);
   };
 }
@@ -369,6 +400,11 @@ function onCallEnded(apiKey, targetEl) {
       subtextEl.textContent = callState.config.default_text.subtext || "";
     }
     
+    // Add idle class back for text mode when call ends
+    if (callState.config?.textMode) {
+      container.classList.add("idle");
+    }
+    
     // Remove agent speaking class
     container.classList.remove("agent-speaking");
     container.style.boxShadow = null;
@@ -401,6 +437,12 @@ function onCallStarted(apiKey, targetEl) {
       
       // Add agent speaking class for text mode styling
       container.classList.add("agent-speaking");
+      
+      // Remove idle class when call starts for text mode
+      const callState = state[apiKey];
+      if (callState.config?.textMode) {
+        container.classList.remove("idle");
+      }
     }, 500);
   };
 }
@@ -424,6 +466,11 @@ async function startCall(apiKey, targetEl) {
 
   }
   if (quietEl) quietEl.style.display = "none";
+
+  // Remove idle class when call starts for text mode
+  if (state[apiKey].config?.textMode) {
+    container.classList.remove("idle");
+  }
 
   const headers = getDefaultApiHeaders(apiKey);
 
