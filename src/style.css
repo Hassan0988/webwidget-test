@@ -50,8 +50,8 @@
   border-radius: 200px;
   padding: 8px 12px 8px 8px;
   box-shadow: 0 4px 40px rgba(137, 92, 246, 0.4);
-  height: 49px;
-  width: 201px;
+  /* height: 49px;
+  width: 201px; */
   gap: 12px;
   border: 1px solid var(--widget-border, rgba(0, 0, 0, 0.08));
   margin: 0;
@@ -356,13 +356,13 @@
 }
 
 #web-widget-container.text-mode .wcw-state-container {
-  width: 56px;
-  height: 56px;
+  width: 48px;
+  height: 48px;
 }
 
 #web-widget-container.text-mode .wcw-quiet {
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
 }
 
 #web-widget-container.text-mode .wcw-agent-talking {
@@ -430,7 +430,7 @@
 @media (max-width: 480px) {
   #web-widget-container.text-mode {
     width: 201px;
-    height: 51px;
+    height: auto;
     opacity: 1;
     transition: all 0.3s ease;
   }
@@ -450,7 +450,7 @@
     transform: translateX(0);
     pointer-events: auto;
     overflow: visible;
-    padding: 8px 5px;
+    padding: 6px 6px;
     transition: all 0.3s ease;
   }
   
@@ -481,7 +481,7 @@
     transform: translateX(0);
     pointer-events: auto;
     overflow: visible;
-    padding: 8px 5px;
+    padding: 6px 6px;
     transition: all 0.3s ease;
   }
   
@@ -500,7 +500,7 @@
   #web-widget-container .wcw-text-container {
     opacity: 1;
     transform: translateX(0);
-    padding: 8px 5px;
+    padding: 6px 6px;
     margin-left: 0.8rem;
     transition: all 0.3s ease;
   }
@@ -530,7 +530,7 @@
     transform: translateX(0);
     pointer-events: auto;
     overflow: visible;
-    padding: 8px 5px;
+    padding: 6px 6px;
     transition: all 0.3s ease;
   }
   
@@ -549,9 +549,23 @@
   
   /* Mobile hover states - ensure they don't conflict with desktop */
   #web-widget-container.text-mode.idle:hover {
-    width: 201px;
+    width: auto;
+    max-width: 280px;
     padding: 8px 12px 8px 8px;
     gap: 12px;
+  }
+  
+  /* Mobile size-specific hover styles */
+  #web-widget-container.text-mode.idle.text-mode-small:hover {
+    max-width: 220px;
+  }
+  
+  #web-widget-container.text-mode.idle.text-mode-medium:hover {
+    max-width: 260px;
+  }
+  
+  #web-widget-container.text-mode.idle.text-mode-large:hover {
+    max-width: 300px;
   }
   
   #web-widget-container.text-mode.idle:hover .wcw-text-container {
@@ -561,7 +575,7 @@
     transform: translateX(0);
     pointer-events: auto;
     overflow: visible;
-    padding: 8px 5px;
+    padding: 6px 6px;
   }
   
   /* Mobile loading state - ensure smooth transitions */
@@ -603,6 +617,53 @@
   #web-widget-container.text-mode .wcw-user-talking .wave-bar {
     transition: all 0.3s ease;
   }
+  
+  /* Mobile always expanded mode */
+  #web-widget-container.text-mode.always-expanded {
+    width: auto;
+    max-width: 280px;
+    padding: 6px 10px 6px 6px;;
+    gap: 10px;
+    transition: all 0.3s ease;
+  }
+  
+  /* Mobile size-specific always-expanded styles */
+  #web-widget-container.text-mode.always-expanded.text-mode-small {
+    max-width: 220px;
+  }
+  
+  #web-widget-container.text-mode.always-expanded.text-mode-medium {
+    max-width: 260px;
+  }
+  
+  #web-widget-container.text-mode.always-expanded.text-mode-large {
+    max-width: 300px;
+  }
+  
+  #web-widget-container.text-mode.always-expanded .wcw-text-container {
+    width: auto;
+    margin-left: 0.6rem;
+    opacity: 1;
+    transform: translateX(0);
+    pointer-events: auto;
+    overflow: visible;
+    padding: 6px 4px;
+    transition: all 0.3s ease;
+  }
+  
+  #web-widget-container.text-mode.always-expanded .wcw-text-container .wcw-title {
+    opacity: 1;
+    transform: translateY(0);
+    transition: all 0.3s ease;
+    font-size: 11px;
+  }
+  
+  #web-widget-container.text-mode.always-expanded .wcw-text-container .wcw-subtext {
+    opacity: 1;
+    transform: translateY(0);
+    transition: all 0.3s ease;
+    font-size: 9px;
+  }
 }
 
 #web-widget-container.text-mode .wcw-text-container .wcw-title {
@@ -619,10 +680,12 @@
 
 /* Text mode idle state - smooth shrink animation */
 #web-widget-container.text-mode.idle {
-  width: 55px;
-  padding: 8px 5px;
+  max-width: 480px;
+  padding: 6px 6px;
   gap: 0;
+  transform: scaleX(1);
 }
+
 
 #web-widget-container.text-mode.idle .wcw-text-container {
   width: 0;
@@ -636,7 +699,9 @@
 
 /* Text mode hover effect - smooth expand animation */
 #web-widget-container.text-mode.idle:hover {
-  width: 201px;
+  transform: scaleX(1);
+  width: auto;
+  max-width: 400px;
   padding: 8px 12px 8px 8px;
   gap: 12px;
 }
@@ -663,6 +728,19 @@
   transition: all 0.3s ease;
 }
 
+/* Size-specific hover styles to match always-expanded sizes */
+#web-widget-container.text-mode.idle.text-mode-small:hover {
+  max-width: 250px;
+}
+
+#web-widget-container.text-mode.idle.text-mode-medium:hover {
+  max-width: 300px;
+}
+
+#web-widget-container.text-mode.idle.text-mode-large:hover {
+  max-width: 400px;
+}
+
 /* Text mode when not idle (speaking/listening) - always show text */
 #web-widget-container.text-mode:not(.idle) .wcw-text-container {
   width: auto;
@@ -679,7 +757,52 @@
   transition: all 0.3s ease;
 }
 
-#web-widget-container.text-mode.text-mode:not(.idle) .wcw-text-container .wcw-subtext {
+#web-widget-container.text-mode:not(.idle) .wcw-text-container .wcw-subtext {
+  opacity: 1;
+  transform: translateY(0);
+  transition: all 0.3s ease;
+}
+
+/* Always expanded text mode - when isHoverMode is false */
+#web-widget-container.text-mode.always-expanded {
+  width: auto;
+  max-width: 400px;
+  padding: 8px 12px 8px 8px;
+  gap: 12px;
+  transition: all 0.3s ease;
+}
+
+/* Size-specific always-expanded styles */
+#web-widget-container.text-mode.always-expanded.text-mode-small {
+  max-width: 250px;
+}
+
+#web-widget-container.text-mode.always-expanded.text-mode-medium {
+  max-width: 300px;
+}
+
+#web-widget-container.text-mode.always-expanded.text-mode-large {
+  max-width: 400px;
+}
+
+#web-widget-container.text-mode.always-expanded .wcw-text-container {
+  display: flex;
+  width: auto;
+  margin-left: 0.8rem;
+  opacity: 1;
+  transform: translateX(0);
+  pointer-events: auto;
+  overflow: visible;
+  transition: all 0.3s ease;
+}
+
+#web-widget-container.text-mode.always-expanded .wcw-text-container .wcw-title {
+  opacity: 1;
+  transform: translateY(0);
+  transition: all 0.3s ease;
+}
+
+#web-widget-container.text-mode.always-expanded .wcw-text-container .wcw-subtext {
   opacity: 1;
   transform: translateY(0);
   transition: all 0.3s ease;

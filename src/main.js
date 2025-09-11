@@ -55,6 +55,11 @@ async function setupObserver() {
     childList: true,
     subtree: true,
   });
+
+  // Handle window resize to update mobile/desktop behavior
+  window.addEventListener('resize', () => {
+    updateWidgetMobileBehavior();
+  });
 }
 
 async function scanForWidgets() {
@@ -138,16 +143,63 @@ function setupWidgets(configs) {
       }
 
       // Handle text mode
-      if (c.textMode && c.default_text && textContainer && titleEl && subtextEl) {
+      if (c.textMode && c.mode=="overlay" && c.default_text && textContainer && titleEl && subtextEl) {
         container.classList.add("text-mode");
-        container.classList.add("idle"); // Add idle class for text mode
+        
+        // Check if hover mode is enabled (default to true if not specified)
+        const isHoverMode = c.isHoverMode !== undefined ? c.isHoverMode : true;
+        
+        // Check if we're on mobile (screen width <= 480px)
+        const isMobile = window.innerWidth <= 480;
+        
+        if (isMobile || !isHoverMode) {
+          container.classList.add("always-expanded"); // Add class for always expanded behavior
+        } else {
+          container.classList.add("idle"); // Add idle class for hover behavior
+        }
+        
         titleEl.textContent = c.default_text.title || "";
         subtextEl.textContent = c.default_text.subtext || "";
+        
+        // Apply size configuration for text mode widgets (smaller than non-text mode)
+        const size = c.size || "medium"; // Default to medium if no size specified
+        
+        // Add size class for CSS targeting
+        container.classList.add(`text-mode-${size}`);
+        
+        // Apply dynamic sizing to text mode elements (smaller than non-text mode)
+        if (size === "small") {
+          // Small text mode - smaller than non-text mode
+          stateContainer.style.width = "80px";
+          stateContainer.style.height = "80px";
+          quietImg.style.width = "24px";
+          quietImg.style.height = "24px";
+          titleEl.style.fontSize = "11px";
+          subtextEl.style.fontSize = "10px";
+        } else if (size === "medium") {
+          // Medium text mode - smaller than non-text mode
+          stateContainer.style.width = "100px";
+          stateContainer.style.height = "100px";
+          quietImg.style.width = "28px";
+          quietImg.style.height = "28px";
+          titleEl.style.fontSize = "13px";
+          subtextEl.style.fontSize = "11px";
+        } else if (size === "large") {
+          // Large text mode - smaller than non-text mode
+          stateContainer.style.width = "140px";
+          stateContainer.style.height = "140px";
+          quietImg.style.width = "36px";
+          quietImg.style.height = "36px";
+          titleEl.style.fontSize = "15px";
+          subtextEl.style.fontSize = "13px";
+        }
       } else {
         container.classList.remove("text-mode");
         container.classList.remove("idle");
         container.style.width = "auto";
         container.style.height = "auto";
+        // Remove any text mode size classes
+        container.classList.remove("text-mode-small", "text-mode-medium", "text-mode-large");
         // Apply size configuration for non-text mode widgets
         const size = c.size 
         if (size === "small") {
@@ -319,7 +371,15 @@ function onAgentStartTalking(apiKey, targetEl) {
       
       // Remove idle class when agent starts talking for text mode
       if (callState.config?.textMode) {
+        const isMobile = window.innerWidth <= 480;
+        const isHoverMode = callState.config?.isHoverMode !== undefined ? callState.config.isHoverMode : true;
+        
         container.classList.remove("idle");
+        
+        // Ensure always-expanded class is present on mobile or when hover mode is disabled
+        if (isMobile || !isHoverMode) {
+          container.classList.add("always-expanded");
+        }
       }
       
       const rgb = hexToRgb(callState.config?.bgColor);
@@ -400,9 +460,19 @@ function onCallEnded(apiKey, targetEl) {
       subtextEl.textContent = callState.config.default_text.subtext || "";
     }
     
-    // Add idle class back for text mode when call ends
+    // Add idle class back for text mode when call ends (but only on desktop with hover mode)
     if (callState.config?.textMode) {
-      container.classList.add("idle");
+      const isMobile = window.innerWidth <= 480;
+      const isHoverMode = callState.config?.isHoverMode !== undefined ? callState.config.isHoverMode : true;
+      
+      // Remove both classes first to ensure clean state
+      container.classList.remove("idle", "always-expanded");
+      
+      if (!isMobile && isHoverMode) {
+        container.classList.add("idle");
+      } else {
+        container.classList.add("always-expanded");
+      }
     }
     
     // Remove agent speaking class
@@ -441,7 +511,15 @@ function onCallStarted(apiKey, targetEl) {
       // Remove idle class when call starts for text mode
       const callState = state[apiKey];
       if (callState.config?.textMode) {
+        const isMobile = window.innerWidth <= 480;
+        const isHoverMode = callState.config?.isHoverMode !== undefined ? callState.config.isHoverMode : true;
+        
         container.classList.remove("idle");
+        
+        // Ensure always-expanded class is present on mobile or when hover mode is disabled
+        if (isMobile || !isHoverMode) {
+          container.classList.add("always-expanded");
+        }
       }
     }, 500);
   };
@@ -469,7 +547,15 @@ async function startCall(apiKey, targetEl) {
 
   // Remove idle class when call starts for text mode
   if (state[apiKey].config?.textMode) {
+    const isMobile = window.innerWidth <= 480;
+    const isHoverMode = state[apiKey].config?.isHoverMode !== undefined ? state[apiKey].config.isHoverMode : true;
+    
     container.classList.remove("idle");
+    
+    // Ensure always-expanded class is present on mobile or when hover mode is disabled
+    if (isMobile || !isHoverMode) {
+      container.classList.add("always-expanded");
+    }
   }
 
   const headers = getDefaultApiHeaders(apiKey);
@@ -536,6 +622,33 @@ async function checkMicrophonePermission() {
 
     return false;
   }
+}
+
+function updateWidgetMobileBehavior() {
+  const isMobile = window.innerWidth <= 480;
+  
+  // Update all text mode widgets based on current screen size
+  Object.keys(state).forEach(apiKey => {
+    if (state[apiKey]?.config?.textMode) {
+      const widgets = getWidgetEl(apiKey, true);
+      const isHoverMode = state[apiKey].config?.isHoverMode !== undefined ? state[apiKey].config.isHoverMode : true;
+      
+      widgets.forEach(widget => {
+        const container = widget.querySelector('.wcw-widget-container');
+        if (container) {
+          // Remove existing classes
+          container.classList.remove('idle', 'always-expanded');
+          
+          // Apply appropriate class based on mobile state
+          if (isMobile || !isHoverMode) {
+            container.classList.add('always-expanded');
+          } else {
+            container.classList.add('idle');
+          }
+        }
+      });
+    }
+  });
 }
 
 function hexToRgb(hex) {
