@@ -68,7 +68,7 @@ export class CallManager {
 
   public async start(): Promise<void> {
     try {
-      await this.client.startCall({
+       await this.client.startCall({
         accessToken: this.accessToken,
       });
     } catch (error) {

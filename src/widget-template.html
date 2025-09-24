@@ -1,31 +1,73 @@
-<div class="wcw-widget-container" id="web-widget-container">
-  <div class="wcw-text-container">
-    <div class="wcw-title"></div>
-    <div class="wcw-subtext"></div>
+<div class="wcw-widget-wrapper">
+  <div class="wcw-summary-section" style="display: none;">
+    <div class="wcw-summary-loader">
+      <div class="wcw-loader-mascot">
+        <div class="wcw-mascot-icon">📝</div>
+        <div class="wcw-writing-animation">
+          <div class="wcw-dot"></div>
+          <div class="wcw-dot"></div>
+          <div class="wcw-dot"></div>
+        </div>
+      </div>
+      <div class="wcw-loader-text">Generating summary...</div>
+    </div>
+    
+    <div class="wcw-summary-content" style="display: none;">
+      <div class="wcw-summary-header">
+        <div class="wcw-summary-icon">
+          <svg width="24" height="23" viewBox="0 0 24 23" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M14.5 1.89648H6C5.46957 1.89648 4.96086 2.09636 4.58579 2.45214C4.21071 2.80793 4 3.29047 4 3.79363V18.9708C4 19.4739 4.21071 19.9565 4.58579 20.3123C4.96086 20.668 5.46957 20.8679 6 20.8679H18C18.5304 20.8679 19.0391 20.668 19.4142 20.3123C19.7893 19.9565 20 19.4739 20 18.9708V7.11363L14.5 1.89648Z" stroke="#E13F8C" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M14 1.89648V7.58791H20" stroke="#E13F8C" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M16 12.332H8" stroke="#E13F8C" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M16 16.125H8" stroke="#E13F8C" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M10 8.53711H8" stroke="#E13F8C" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            
+        </div>
+        <div class="wcw-summary-title">Conversation Summary</div>
+        <button class="wcw-summary-close">
+          <svg width="26" height="24" viewBox="0 0 26 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M18.9729 5.82227L6.69727 17.4666" stroke="#565454" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M6.69727 5.82227L18.9729 17.4666" stroke="#565454" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            
+        </button>
+      </div>
+      <div class="wcw-summary-body">
+        <p>You have an appointment on <strong>May 3rd, 2024 at 11:30 AM</strong> to see the eye doctor. Please bring your insurance card.</p>
+      </div>
+    </div>
   </div>
-  
-  <div class="wcw-state-container">
-    <img class="wcw-quiet" src="" alt="Microphone" />
-    
-    <div class="wcw-loading" style="display: none;">
-      <div class="loading-spinner"></div>
+
+  <div class="wcw-widget-container" id="web-widget-container">
+    <div class="wcw-text-container">
+      <div class="wcw-title"></div>
+      <div class="wcw-subtext"></div>
     </div>
     
-    <div class="wcw-agent-talking" style="display: none;">
-      <img src="" alt="Agent" />
-    </div>
-    
-    <div class="wcw-user-talking" style="display: none;">
-      <div class="wave-bar" style="animation-delay: 0s;"></div>
-      <div class="wave-bar" style="animation-delay: 0.1s;"></div>
-      <div class="wave-bar" style="animation-delay: 0.2s;"></div>
-      <div class="wave-bar" style="animation-delay: 0.3s;"></div>
-    </div>
-    
-    <div class="ripple-container">
-      <div class="ripple ripple-1"></div>
-      <div class="ripple ripple-2"></div>
-      <div class="ripple ripple-3"></div>
+    <div class="wcw-state-container">
+      <img class="wcw-quiet" src="" alt="Microphone" />
+      
+      <div class="wcw-loading" style="display: none;">
+        <div class="loading-spinner"></div>
+      </div>
+      
+      <div class="wcw-agent-talking" style="display: none;">
+        <img src="" alt="Agent" />
+      </div>
+      
+      <div class="wcw-user-talking" style="display: none;">
+        <div class="wave-bar" style="animation-delay: 0s;"></div>
+        <div class="wave-bar" style="animation-delay: 0.1s;"></div>
+        <div class="wave-bar" style="animation-delay: 0.2s;"></div>
+        <div class="wave-bar" style="animation-delay: 0.3s;"></div>
+      </div>
+      
+      <div class="ripple-container">
+        <div class="ripple ripple-1"></div>
+        <div class="ripple ripple-2"></div>
+        <div class="ripple ripple-3"></div>
+      </div>
     </div>
   </div>
 </div>

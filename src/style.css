@@ -808,4 +808,318 @@
   transition: all 0.3s ease;
 }
 
+/* Widget Wrapper */
+.wcw-widget-wrapper {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Default center alignment */
+  gap: 5px;
+}
+
+/* Dynamic alignment classes */
+.wcw-widget-wrapper.wcw-align-start {
+  align-items: flex-start;
+}
+
+.wcw-widget-wrapper.wcw-align-center {
+  align-items: center;
+}
+
+.wcw-widget-wrapper.wcw-align-end {
+  align-items: flex-end;
+}
+
+/* Summary Section Styles */
+.wcw-summary-section {
+  position: relative;
+  z-index: 10001;
+  transition: all 0.4s cubic-bezier(0.4, 0.0, 0.2, 1);
+  opacity: 0;
+  animation: slideInFromTop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes slideInFromTop {
+  from {
+    opacity: 0;
+    /* transform: translateX(-50%) translateY(-20px); */
+  }
+  to {
+    opacity: 1;
+    /* transform: translateX(-50%) translateY(0); */
+  }
+}
+
+.wcw-summary-section.wcw-summary-hiding {
+  animation: slideOutToTop 0.3s ease-in forwards;
+}
+
+@keyframes slideOutToTop {
+  from {
+    opacity: 1;
+    /* transform: translateX(-50%) translateY(0); */
+  }
+  to {
+    opacity: 0;
+    /* transform: translateX(-50%) translateY(-20px); */
+  }
+}
+
+/* Summary positioning adjustments based on widget location */
+.wcw-summary-position-top {
+  position: relative;
+  top: auto;
+  margin-bottom: 16px;
+}
+
+/* Summary Loader Styles */
+.wcw-summary-loader {
+  background: var(--widget-bg, #ffffff);
+  border-radius: 20px;
+  padding: 10px;
+  box-shadow: 
+    0 20px 60px rgba(0, 0, 0, 0.08),
+    0 8px 25px rgba(0, 0, 0, 0.06),
+    0 0 0 1px rgba(0, 0, 0, 0.04);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  width: 200px;
+  /* min-width: 240px;
+  max-width: 320px; */
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 60px rgba(137, 92, 246, 0.4);;
+}
+
+.wcw-loader-mascot {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  position: relative;
+}
+
+.wcw-mascot-icon {
+  font-size: 32px;
+  animation: mascotBounce 2s ease-in-out infinite;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1));
+}
+
+@keyframes mascotBounce {
+  0%, 100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  25% {
+    transform: translateY(-2px) rotate(-2deg);
+  }
+  50% {
+    transform: translateY(0) rotate(0deg);
+  }
+  75% {
+    transform: translateY(-1px) rotate(1deg);
+  }
+}
+
+.wcw-writing-animation {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.wcw-dot {
+  width: 4px;
+  height: 4px;
+  background: var(--accent-color, #ff6b9d);
+  border-radius: 50%;
+  animation: writingDots 1.5s ease-in-out infinite;
+  opacity: 0.3;
+}
+
+.wcw-dot:nth-child(1) {
+  animation-delay: 0s;
+}
+
+.wcw-dot:nth-child(2) {
+  animation-delay: 0.3s;
+}
+
+.wcw-dot:nth-child(3) {
+  animation-delay: 0.6s;
+}
+
+@keyframes writingDots {
+  0%, 60%, 100% {
+    opacity: 0.3;
+    transform: scale(1);
+  }
+  30% {
+    opacity: 1;
+    transform: scale(1.2);
+  }
+}
+
+.wcw-loader-text {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary, #1a1a1a);
+  text-align: center;
+  opacity: 0.8;
+  letter-spacing: -0.01em;
+}
+
+/* Summary Content Styles */
+.wcw-summary-content {
+  background: var(--widget-bg, #ffffff);
+  border-radius: 20px;
+  box-shadow: 
+    0 20px 60px rgba(0, 0, 0, 0.08),
+    0 8px 25px rgba(0, 0, 0, 0.06),
+    0 0 0 1px rgba(0, 0, 0, 0.04);
+  overflow: hidden;
+  min-width: 292px;
+  max-width: 292px;
+  animation: summaryAppear 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 60px rgba(137, 92, 246, 0.3);;
+}
+
+@keyframes summaryAppear {
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0px);
+  }
+}
+
+.wcw-summary-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px;
+  background: linear-gradient(135deg, #fafafa 0%, #f5f5f5 100%);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  position: relative;
+}
+
+.wcw-summary-icon {
+  font-size: 18px;
+  color: #E13F8C;
+}
+
+.wcw-summary-title {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: #2d3436;
+  flex: 1;
+  margin: 0;
+  padding: 0;
+  letter-spacing: -0.02em;
+}
+
+.wcw-summary-close {
+  background: rgba(0, 0, 0, 0.04);
+  border: none;
+  color: #636e72;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 0;
+  border-radius: 10px;
+  transition: all 0.2s cubic-bezier(0.4, 0.0, 0.2, 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  font-weight: 600;
+}
+
+.wcw-summary-close:hover {
+  background: rgba(231, 63, 140, 0.1);
+  color: #E13F8C;
+  transform: scale(1.05);
+}
+
+.wcw-summary-body {
+  padding: 15px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.wcw-summary-body p {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.6;
+  color: #636e72;
+  letter-spacing: -0.01em;
+  max-height: 135px;
+
+}
+
+.wcw-summary-body strong {
+  color: #E13F8C;
+  font-weight: 700;
+  background: linear-gradient(135deg, #E13F8C, #ff6b9d);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Dark theme support for summary */
+#web-widget-container.wcw-theme-dark .wcw-summary-loader,
+#web-widget-container.wcw-theme-dark .wcw-summary-content {
+  background: var(--widget-bg, #172139);
+  border: 1px solid var(--widget-border, rgba(255, 255, 255, 0.1));
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.3);
+}
+
+#web-widget-container.wcw-theme-dark .wcw-loader-text,
+#web-widget-container.wcw-theme-dark .wcw-summary-body p {
+  color: var(--text-primary, #ffffff);
+}
+
+/* Responsive adjustments for summary */
+@media (max-width: 480px) {
+  .wcw-summary-section {
+    left: 10px;
+    right: 10px;
+    transform: none;
+    max-width: calc(100vw - 20px);
+    top: 10px;
+  }
+  
+  .wcw-summary-loader,
+  .wcw-summary-content {
+    min-width: auto;
+    max-width: 100%;
+    margin: 0 auto;
+  }
+  
+  .wcw-summary-content {
+    min-width: 260px;
+    max-width: 100%;
+  }
+  
+  .wcw-summary-header {
+    padding: 14px 16px;
+  }
+  
+  .wcw-summary-title {
+    font-size: 15px;
+  }
+  
+  .wcw-summary-body {
+    padding: 16px;
+  }
+  
+  .wcw-summary-body p {
+    font-size: 13px;
+  }
+}
+
+/* Removed unnecessary positioning classes since summary now uses simple fixed positioning */
+
 

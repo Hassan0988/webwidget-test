@@ -281,7 +281,10 @@ function setupWidgets(configs) {
       state[c.key] = {};
       state[c.key].callInProgress = false;
       state[c.key].config = c; // Store the config for later use
-
+      state[c.key].summaryVisible = false;
+      state[c.key].summaryGenerating = false;
+      state[c.key].summaryTimeout = null;
+      state[c.key].room = null;
       container.addEventListener("click", onPlayClicked(c.key));
 
       container.style.display = "flex";
@@ -478,6 +481,10 @@ function onCallEnded(apiKey, targetEl) {
     // Remove agent speaking class
     container.classList.remove("agent-speaking");
     container.style.boxShadow = null;
+    
+    // Show summary after call ends
+    showSummary(apiKey, targetEl);
+    
     try {
       audioStream.getTracks().forEach(track => track.stop());
     } catch {
@@ -487,8 +494,15 @@ function onCallEnded(apiKey, targetEl) {
 }
 
 function onCallStarted(apiKey, targetEl) {
-  return () => {
+  return (e) => {
     const container = targetEl;
+    const callState = state[apiKey];
+
+    // Capture room ID from the call instance
+    if (callState.callInstance && callState.callInstance.client && callState.callInstance.client.room) {
+      callState.room = callState.callInstance.client.room?.roomInfo?.name || null;
+      console.log('Room ID captured on call start:', callState.room);
+    }
 
     const agentImg = container.querySelector(".wcw-agent-talking");
     const loadingEl = container.querySelector(".wcw-loading");
@@ -509,7 +523,6 @@ function onCallStarted(apiKey, targetEl) {
       container.classList.add("agent-speaking");
       
       // Remove idle class when call starts for text mode
-      const callState = state[apiKey];
       if (callState.config?.textMode) {
         const isMobile = window.innerWidth <= 480;
         const isHoverMode = callState.config?.isHoverMode !== undefined ? callState.config.isHoverMode : true;
@@ -529,6 +542,11 @@ async function startCall(apiKey, targetEl) {
   const hasMicPermission = await checkMicrophonePermission()
 
   if (!hasMicPermission) return
+
+  // Hide summary if visible when starting a new call
+  if (state[apiKey].summaryVisible) {
+    hideSummary(apiKey, targetEl);
+  }
 
   state[apiKey].isLoading = true;
 
@@ -660,4 +678,229 @@ function hexToRgb(hex) {
   const g = parseInt(hex.slice(2, 4), 16);
   const b = parseInt(hex.slice(4, 6), 16);
   return `${r}, ${g}, ${b}`; // returns "173, 61, 225"
+}
+
+// Summary functionality
+async function showSummary(apiKey, targetEl) {
+  console.log('showSummary called for apiKey:', apiKey);
+  const callState = state[apiKey];
+  
+  // Get the widget element that contains this target element
+  const widgetEl = targetEl.closest(`[${divAttrName}="${apiKey}"]`);
+  
+  if (!widgetEl) {
+    console.error('Widget element not found for apiKey:', apiKey);
+    console.log('targetEl:', targetEl);
+    console.log('Looking for attribute:', `${divAttrName}="${apiKey}"`);
+    return;
+  }
+  
+  console.log('Widget element found:', widgetEl);
+  
+  const summarySection = widgetEl.querySelector('.wcw-summary-section');
+  
+  if (!summarySection) {
+    console.error('Summary section not found in widget');
+    console.log('Widget HTML:', widgetEl.innerHTML);
+    return;
+  }
+  
+  const summaryLoader = summarySection.querySelector('.wcw-summary-loader');
+  const summaryContent = summarySection.querySelector('.wcw-summary-content');
+  const closeBtn = summarySection.querySelector('.wcw-summary-close');
+  
+  console.log('Summary elements found:', {
+    summarySection: !!summarySection,
+    summaryLoader: !!summaryLoader,
+    summaryContent: !!summaryContent,
+    closeBtn: !!closeBtn
+  });
+  
+  // Show loader first
+  summarySection.style.display = 'block';
+  summaryLoader.style.display = 'flex';
+  summaryContent.style.display = 'none';
+  
+  // Position summary after it's visible in the DOM
+  setTimeout( () => {
+    positionSummary(apiKey, widgetEl, summarySection);
+  }, 10);
+  
+  console.log('Summary section display set to block');
+  
+  // Store summary state
+  callState.summaryGenerating = true;
+  callState.summaryVisible = true;
+  
+  // Start the summary fetching process after 5 seconds
+  callState.summaryTimeout = setTimeout(() => {
+    if (callState.room) {
+      console.log('Starting summary fetch process for room:', callState.room);
+      fetchSummaryWithRetry(apiKey, callState.room, summaryLoader, summaryContent, 0);
+    } else {
+      // No room ID, show default summary
+      showDefaultSummary(summaryLoader, summaryContent);
+      callState.summaryGenerating = false;
+    }
+  }, 5000);
+  
+  // Add close button handler
+  if (closeBtn) {
+    closeBtn.onclick = () => hideSummary(apiKey, targetEl);
+  }
+}
+
+function hideSummary(apiKey, targetEl) {
+  const callState = state[apiKey];
+  const widgetEl = targetEl.closest(`[${divAttrName}="${apiKey}"]`);
+  const summarySection = widgetEl.querySelector('.wcw-summary-section');
+  const container = targetEl;
+  
+  // Clear any pending timeout
+  if (callState.summaryTimeout) {
+    clearTimeout(callState.summaryTimeout);
+    callState.summaryTimeout = null;
+  }
+  
+  // Add hiding animation class
+  summarySection.classList.add('wcw-summary-hiding');
+  
+  // Reset widget position
+  resetWidgetPosition(container);
+  
+  setTimeout(() => {
+    summarySection.style.display = 'none';
+    summarySection.classList.remove('wcw-summary-hiding');
+    callState.summaryVisible = false;
+    callState.summaryGenerating = false;
+  }, 300);
+}
+
+function positionSummary(apiKey, widgetEl, summarySection) {
+  const callState = state[apiKey];
+  const config = callState.config;
+  const wrapper = widgetEl.querySelector('.wcw-widget-wrapper');
+  
+  if (wrapper) {
+    // Remove existing alignment classes
+    wrapper.classList.remove('wcw-align-start', 'wcw-align-center', 'wcw-align-end');
+    
+    // Set alignment based on widget justification
+    const justification = config.justification || 'center';
+    
+    switch (justification) {
+      case 'left':
+        wrapper.classList.add('wcw-align-start');
+        break;
+      case 'right':
+        wrapper.classList.add('wcw-align-end');
+        break;
+      case 'center':
+      default:
+        wrapper.classList.add('wcw-align-center');
+        break;
+    }
+  }
+}
+
+function resetWidgetPosition(container) {
+  // No longer need to modify widget position since summary doesn't affect it
+}
+
+// Fetch summary with retry logic
+async function fetchSummaryWithRetry(apiKey, roomId, summaryLoader, summaryContent, retryCount) {
+  const maxRetries = 5;
+  
+  // Remove "web_" prefix if it exists, otherwise use room ID as is
+  const cleanRoomId = roomId.startsWith('web_') ? roomId.substring(4) : roomId;
+  
+  console.log(`Attempt ${retryCount + 1}: Fetching summary for room:`, cleanRoomId);
+  
+  try {
+    const headers = getDefaultApiHeaders(apiKey);
+    const req = await fetch(`https://thinkrr.xano.io/api:Jy1ozuiJ:dev/call-summary?roomId=${cleanRoomId}`, {
+      method: "GET",
+      headers: headers,
+    });
+    
+    if (req.ok) {
+      const summaryData = await req.json();
+      console.log('Summary response:', summaryData);
+      
+      if (summaryData.processed === true) {
+        // Summary is ready, display it
+        displaySummary(summaryLoader, summaryContent, summaryData.summary);
+        return;
+      } else {
+        // Summary not ready yet
+        console.log('Summary not processed yet, retrying...');
+        
+        if (retryCount < maxRetries - 1) {
+          // Retry after 2 seconds
+          setTimeout(() => {
+            fetchSummaryWithRetry(apiKey, roomId, summaryLoader, summaryContent, retryCount + 1);
+          }, 3000);
+        } else {
+          // Max retries reached, show default summary
+          console.log('Max retries reached, showing default summary');
+          showDefaultSummary(summaryLoader, summaryContent);
+        }
+      }
+    } else {
+      throw new Error(`API request failed: ${req.status} ${req.statusText}`);
+    }
+  } catch (error) {
+    console.error('Error fetching summary:', error);
+    
+    if (retryCount < maxRetries - 1) {
+      // Retry after 2 seconds
+      setTimeout(() => {
+        fetchSummaryWithRetry(apiKey, roomId, summaryLoader, summaryContent, retryCount + 1);
+      }, 2000);
+    } else {
+      // Max retries reached, show default summary
+      showDefaultSummary(summaryLoader, summaryContent);
+    }
+  }
+}
+
+// Display the summary from API response
+function displaySummary(summaryLoader, summaryContent, summaryData) {
+  const bodyEl = summaryContent.querySelector('.wcw-summary-body p');
+  
+  // Build content with title above description if title exists
+  let content = '';
+  
+  if (summaryData.title) {
+    content += `<strong>${summaryData.title}</strong><br>`;
+  }
+  
+  if (summaryData.description) {
+    content += summaryData.description;
+  } else if (summaryData.content) {
+    // Fallback to content if description is not available
+    content += summaryData.content;
+  }
+  
+  // Update the body content with HTML
+  if (bodyEl) {
+    bodyEl.innerHTML = content;
+  }
+  
+  // Hide loader and show content
+  summaryLoader.style.display = 'none';
+  summaryContent.style.display = 'block';
+  
+  console.log('Summary displayed successfully');
+}
+
+// Show default summary when API fails or processing fails
+function showDefaultSummary(summaryLoader, summaryContent) {
+  const defaultSummary = {
+    title: "I'm sorry I couldn't be more helpful this time.",
+    description: "I'm still learning, but I'm getting smarter with every conversation. Please try again if you need to—I'm ready when you are!"
+  };
+  
+  displaySummary(summaryLoader, summaryContent, defaultSummary);
+  console.log('Default summary displayed');
 }
