@@ -811,32 +811,51 @@
 /* Widget Wrapper */
 .wcw-widget-wrapper {
   position: relative;
+}
+
+/* When widget is at top, use flexbox to create space */
+.wcw-widget-wrapper.wcw-widget-at-top {
   display: flex;
   flex-direction: column;
-  align-items: center; /* Default center alignment */
-  gap: 5px;
-}
-
-/* Dynamic alignment classes */
-.wcw-widget-wrapper.wcw-align-start {
-  align-items: flex-start;
-}
-
-.wcw-widget-wrapper.wcw-align-center {
-  align-items: center;
-}
-
-.wcw-widget-wrapper.wcw-align-end {
-  align-items: flex-end;
+  gap: 10px;
 }
 
 /* Summary Section Styles */
 .wcw-summary-section {
-  position: relative;
+  position: absolute;
+  bottom: 100%;
+  margin-bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
   z-index: 10001;
   transition: all 0.4s cubic-bezier(0.4, 0.0, 0.2, 1);
   opacity: 0;
   animation: slideInFromTop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+/* When widget is at top, use relative positioning in flexbox */
+.wcw-widget-wrapper.wcw-widget-at-top .wcw-summary-section {
+  position: relative;
+  bottom: auto;
+  left: auto;
+  transform: none;
+  margin-bottom: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Dynamic alignment for wrapper when at top */
+.wcw-widget-wrapper.wcw-widget-at-top.wcw-align-start {
+  align-items: flex-start;
+}
+
+.wcw-widget-wrapper.wcw-widget-at-top.wcw-align-center {
+  align-items: center;
+}
+
+.wcw-widget-wrapper.wcw-widget-at-top.wcw-align-end {
+  align-items: flex-end;
 }
 
 @keyframes slideInFromTop {
@@ -889,7 +908,8 @@
   /* min-width: 240px;
   max-width: 320px; */
   backdrop-filter: blur(10px);
-  box-shadow: 0 4px 60px rgba(137, 92, 246, 0.4);;
+  box-shadow: 0 4px 60px rgba(137, 92, 246, 0.4);
+  z-index: 10001;
 }
 
 .wcw-loader-mascot {
@@ -981,7 +1001,8 @@
   max-width: 292px;
   animation: summaryAppear 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
   backdrop-filter: blur(10px);
-  box-shadow: 0 4px 60px rgba(137, 92, 246, 0.3);;
+  box-shadow: 0 4px 60px rgba(137, 92, 246, 0.3);
+  z-index: 10001;
 }
 
 @keyframes summaryAppear {

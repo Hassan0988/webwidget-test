@@ -196,7 +196,7 @@ function setupWidgets(configs) {
       } else {
         container.classList.remove("text-mode");
         container.classList.remove("idle");
-        container.style.width = "auto";
+        container.style.width = "fit-content";
         container.style.height = "auto";
         // Remove any text mode size classes
         container.classList.remove("text-mode-small", "text-mode-medium", "text-mode-large");
@@ -781,26 +781,77 @@ function positionSummary(apiKey, widgetEl, summarySection) {
   const config = callState.config;
   const wrapper = widgetEl.querySelector('.wcw-widget-wrapper');
   
-  if (wrapper) {
-    // Remove existing alignment classes
-    wrapper.classList.remove('wcw-align-start', 'wcw-align-center', 'wcw-align-end');
+  // Check if widget is at the top of the screen
+  const widgetRect = widgetEl.getBoundingClientRect();
+  const isAtTop = widgetRect.top <= 100; // Consider "top" if within 100px of viewport top
+  
+  // Remove existing classes
+  summarySection.classList.remove('wcw-align-start', 'wcw-align-center', 'wcw-align-end');
+  wrapper.classList.remove('wcw-widget-at-top', 'wcw-align-start', 'wcw-align-center', 'wcw-align-end');
+  
+  // Apply alignment based on justification
+  const justification = config.justification || 'center';
+  
+  if (isAtTop) {
+    // Widget is at top, use flexbox layout to push widget down naturally
+    wrapper.classList.add('wcw-widget-at-top');
     
-    // Set alignment based on widget justification
-    const justification = config.justification || 'center';
+    // Check if widget is large (width > 200px or height > 200px)
+    const widgetContainer = widgetEl.querySelector('.wcw-widget-container');
+    const isLargeWidget = widgetContainer && (
+      widgetContainer.offsetWidth > 200 || 
+      widgetContainer.offsetHeight > 200
+    );
+    
+    // Apply alignment class to wrapper for flexbox alignment
+    if (isLargeWidget) {
+      // Large widgets always use center alignment
+      wrapper.classList.add('wcw-align-center');
+    } else {
+      // Small widgets use justification-based alignment
+      switch (justification) {
+        case 'left':
+          wrapper.classList.add('wcw-align-start');
+          break;
+        case 'right':
+          wrapper.classList.add('wcw-align-end');
+          break;
+        case 'center':
+        default:
+          wrapper.classList.add('wcw-align-center');
+          break;
+      }
+    }
+    
+    // Clear any inline styles
+    summarySection.style.left = '';
+    summarySection.style.transform = '';
+  } else {
+    // Widget is not at top, use absolute positioning for overlay
+    let leftPosition = '50%';
+    let transform = 'translateX(-50%)';
     
     switch (justification) {
       case 'left':
-        wrapper.classList.add('wcw-align-start');
+        leftPosition = '0%';
+        transform = 'translateX(0)';
         break;
       case 'right':
-        wrapper.classList.add('wcw-align-end');
+        leftPosition = '100%';
+        transform = 'translateX(-100%)';
         break;
       case 'center':
       default:
-        wrapper.classList.add('wcw-align-center');
+        leftPosition = '50%';
+        transform = 'translateX(-50%)';
         break;
     }
+    
+    summarySection.style.left = leftPosition;
+    summarySection.style.transform = transform;
   }
+  
+  console.log(`Applied alignment for justification: ${justification}, isAtTop: ${isAtTop}`);
 }
 
 function resetWidgetPosition(container) {
