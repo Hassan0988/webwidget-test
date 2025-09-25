@@ -16,6 +16,7 @@ const divAttrName = "data-widget-key";
 const baseApiUrl = "https://xrur-hdnn-8wyr.n7c.xano.io/api:Jy1ozuiJ";
 const getConfigsUrl = `${baseApiUrl}/widget-config-public`;
 const createWebCallUrl = `${baseApiUrl}/createWebCallForWidget`;
+const getCallSummaryUrl = `${baseApiUrl}/call-summary`;
 
 const getDefaultApiHeaders = (apiKey) => ({
   "Content-Type": "application/json",
@@ -105,6 +106,9 @@ function setupWidgets(configs) {
       if (!el) continue;
 
       el.innerHTML = widgetTemplate;
+      
+      // Ensure widget has high z-index to appear above page content
+      el.style.zIndex = '999997';
 
       const container = el.querySelector(".wcw-widget-container");
       const stateContainer = el.querySelector(".wcw-state-container");
@@ -685,52 +689,60 @@ async function showSummary(apiKey, targetEl) {
   console.log('showSummary called for apiKey:', apiKey);
   const callState = state[apiKey];
   
+  // Check if summary is enabled in config (default to true if not specified)
+  const isSummaryEnabled = callState.config.isSummaryEnabled !== undefined ? callState.config.isSummaryEnabled : true;
+  if (!isSummaryEnabled) {
+    console.log('Summary generation is disabled in config');
+    return;
+  }
+  
   // Get the widget element that contains this target element
   const widgetEl = targetEl.closest(`[${divAttrName}="${apiKey}"]`);
   
   if (!widgetEl) {
     console.error('Widget element not found for apiKey:', apiKey);
-    console.log('targetEl:', targetEl);
-    console.log('Looking for attribute:', `${divAttrName}="${apiKey}"`);
     return;
   }
   
-  console.log('Widget element found:', widgetEl);
-  
-  const summarySection = widgetEl.querySelector('.wcw-summary-section');
-  
-  if (!summarySection) {
-    console.error('Summary section not found in widget');
-    console.log('Widget HTML:', widgetEl.innerHTML);
-    return;
+  // Remove any existing summary from body
+  const existingSummary = document.body.querySelector(`[data-summary-for="${apiKey}"]`);
+  if (existingSummary) {
+    existingSummary.remove();
   }
+  
+  // Create summary section dynamically
+  const summarySection = createSummaryElement(apiKey);
+  
+  // Append to body so it's not constrained by any parent containers
+  document.body.appendChild(summarySection);
   
   const summaryLoader = summarySection.querySelector('.wcw-summary-loader');
   const summaryContent = summarySection.querySelector('.wcw-summary-content');
   const closeBtn = summarySection.querySelector('.wcw-summary-close');
   
-  console.log('Summary elements found:', {
-    summarySection: !!summarySection,
-    summaryLoader: !!summaryLoader,
-    summaryContent: !!summaryContent,
-    closeBtn: !!closeBtn
-  });
-  
   // Show loader first
-  summarySection.style.display = 'block';
   summaryLoader.style.display = 'flex';
   summaryContent.style.display = 'none';
   
-  // Position summary after it's visible in the DOM
-  setTimeout( () => {
-    positionSummary(apiKey, widgetEl, summarySection);
+  // Position summary relative to widget's global position
+  setTimeout(() => {
+    positionSummaryOnBody(apiKey, widgetEl, summarySection);
+    
+    // Add resize listener to update position if window resizes
+    const updatePosition = () => positionSummaryOnBody(apiKey, widgetEl, summarySection);
+    
+    window.addEventListener('resize', updatePosition);
+    
+    // Store listeners for cleanup
+    callState.positionUpdateListeners = { updatePosition };
   }, 10);
   
-  console.log('Summary section display set to block');
+  console.log('Summary section added to body');
   
-  // Store summary state
+  // Store summary state and reference
   callState.summaryGenerating = true;
   callState.summaryVisible = true;
+  callState.summaryElement = summarySection;
   
   // Start the summary fetching process after 5 seconds
   callState.summaryTimeout = setTimeout(() => {
@@ -738,7 +750,6 @@ async function showSummary(apiKey, targetEl) {
       console.log('Starting summary fetch process for room:', callState.room);
       fetchSummaryWithRetry(apiKey, callState.room, summaryLoader, summaryContent, 0);
     } else {
-      // No room ID, show default summary
       showDefaultSummary(summaryLoader, summaryContent);
       callState.summaryGenerating = false;
     }
@@ -752,106 +763,102 @@ async function showSummary(apiKey, targetEl) {
 
 function hideSummary(apiKey, targetEl) {
   const callState = state[apiKey];
-  const widgetEl = targetEl.closest(`[${divAttrName}="${apiKey}"]`);
-  const summarySection = widgetEl.querySelector('.wcw-summary-section');
-  const container = targetEl;
   
-  // Clear any pending timeout
+  if (!callState.summaryVisible) {
+    return;
+  }
+  
+  // Find and remove summary from body
+  const summarySection = document.body.querySelector(`[data-summary-for="${apiKey}"]`);
+  
+  if (summarySection) {
+    summarySection.classList.add('wcw-summary-hiding');
+    
+    setTimeout(() => {
+      summarySection.remove();
+    }, 300);
+  }
+  
+  // Clear timeout if it's still running
   if (callState.summaryTimeout) {
     clearTimeout(callState.summaryTimeout);
     callState.summaryTimeout = null;
   }
   
-  // Add hiding animation class
-  summarySection.classList.add('wcw-summary-hiding');
-  
-  // Reset widget position
-  resetWidgetPosition(container);
-  
-  setTimeout(() => {
-    summarySection.style.display = 'none';
-    summarySection.classList.remove('wcw-summary-hiding');
-    callState.summaryVisible = false;
-    callState.summaryGenerating = false;
-  }, 300);
-}
-
-function positionSummary(apiKey, widgetEl, summarySection) {
-  const callState = state[apiKey];
-  const config = callState.config;
-  const wrapper = widgetEl.querySelector('.wcw-widget-wrapper');
-  
-  // Check if widget is at the top of the screen
-  const widgetRect = widgetEl.getBoundingClientRect();
-  const isAtTop = widgetRect.top <= 100; // Consider "top" if within 100px of viewport top
-  
-  // Remove existing classes
-  summarySection.classList.remove('wcw-align-start', 'wcw-align-center', 'wcw-align-end');
-  wrapper.classList.remove('wcw-widget-at-top', 'wcw-align-start', 'wcw-align-center', 'wcw-align-end');
-  
-  // Apply alignment based on justification
-  const justification = config.justification || 'center';
-  
-  if (isAtTop) {
-    // Widget is at top, use flexbox layout to push widget down naturally
-    wrapper.classList.add('wcw-widget-at-top');
-    
-    // Check if widget is large (width > 200px or height > 200px)
-    const widgetContainer = widgetEl.querySelector('.wcw-widget-container');
-    const isLargeWidget = widgetContainer && (
-      widgetContainer.offsetWidth > 200 || 
-      widgetContainer.offsetHeight > 200
-    );
-    
-    // Apply alignment class to wrapper for flexbox alignment
-    if (isLargeWidget) {
-      // Large widgets always use center alignment
-      wrapper.classList.add('wcw-align-center');
-    } else {
-      // Small widgets use justification-based alignment
-      switch (justification) {
-        case 'left':
-          wrapper.classList.add('wcw-align-start');
-          break;
-        case 'right':
-          wrapper.classList.add('wcw-align-end');
-          break;
-        case 'center':
-        default:
-          wrapper.classList.add('wcw-align-center');
-          break;
-      }
-    }
-    
-    // Clear any inline styles
-    summarySection.style.left = '';
-    summarySection.style.transform = '';
-  } else {
-    // Widget is not at top, use absolute positioning for overlay
-    let leftPosition = '50%';
-    let transform = 'translateX(-50%)';
-    
-    switch (justification) {
-      case 'left':
-        leftPosition = '0%';
-        transform = 'translateX(0)';
-        break;
-      case 'right':
-        leftPosition = '100%';
-        transform = 'translateX(-100%)';
-        break;
-      case 'center':
-      default:
-        leftPosition = '50%';
-        transform = 'translateX(-50%)';
-        break;
-    }
-    
-    summarySection.style.left = leftPosition;
-    summarySection.style.transform = transform;
+  // Remove event listeners
+  if (callState.positionUpdateListeners) {
+    window.removeEventListener('resize', callState.positionUpdateListeners.updatePosition);
+    callState.positionUpdateListeners = null;
   }
   
-  console.log(`Applied alignment for justification: ${justification}, isAtTop: ${isAtTop}`);
+  // Reset summary state
+  callState.summaryVisible = false;
+  callState.summaryGenerating = false;
+  callState.summaryElement = null;
+}
+
+function positionSummaryOnBody(apiKey, widgetEl, summarySection) {
+  // Always position summary at top-right of screen regardless of widget position
+  // This provides consistent UX - users always know where to look for summaries
+  const right = 20; // 20px from right edge
+  const top = 20;   // 20px from top edge
+  
+  // Apply fixed positioning at top-right corner
+  summarySection.style.right = `${right}px`;
+  summarySection.style.top = `${top}px`;
+  summarySection.style.left = 'auto';  // Clear any left positioning
+  summarySection.style.transform = 'none';  // Clear any transforms
+  
+  console.log(`Positioned summary at top-right: right=${right}px, top=${top}px`);
+}
+
+function createSummaryElement(apiKey) {
+  const summarySection = document.createElement('div');
+  summarySection.className = 'wcw-summary-section';
+  summarySection.setAttribute('data-summary-for', apiKey);
+  summarySection.style.position = 'fixed';
+  summarySection.style.zIndex = '2147483647'; // Maximum z-index value
+  summarySection.style.display = 'block';
+  
+  summarySection.innerHTML = `
+    <div class="wcw-summary-loader">
+      <div class="wcw-loader-mascot">
+        <div class="wcw-mascot-icon">📝</div>
+        <div class="wcw-writing-animation">
+          <div class="wcw-dot"></div>
+          <div class="wcw-dot"></div>
+          <div class="wcw-dot"></div>
+        </div>
+      </div>
+      <div class="wcw-loader-text">Generating summary...</div>
+    </div>
+    
+    <div class="wcw-summary-content" style="display: none;">
+      <div class="wcw-summary-header">
+        <div class="wcw-summary-icon">
+          <svg width="24" height="23" viewBox="0 0 24 23" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M14.5 1.89648H6C5.46957 1.89648 4.96086 2.09636 4.58579 2.45214C4.21071 2.80793 4 3.29047 4 3.79363V18.9708C4 19.4739 4.21071 19.9565 4.58579 20.3123C4.96086 20.668 5.46957 20.8679 6 20.8679H18C18.5304 20.8679 19.0391 20.668 19.4142 20.3123C19.7893 19.9565 20 19.4739 20 18.9708V7.11363L14.5 1.89648Z" stroke="#E13F8C" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M14 1.89648V7.58791H20" stroke="#E13F8C" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M16 12.332H8" stroke="#E13F8C" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M16 16.125H8" stroke="#E13F8C" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M10 8.53711H8" stroke="#E13F8C" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="wcw-summary-title">Conversation Summary</div>
+        <button class="wcw-summary-close">
+          <svg width="26" height="24" viewBox="0 0 26 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M18.9729 5.82227L6.69727 17.4666" stroke="#565454" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M6.69727 5.82227L18.9729 17.4666" stroke="#565454" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+      </div>
+      <div class="wcw-summary-body">
+        <p>You have an appointment on <strong>May 3rd, 2024 at 11:30 AM</strong> to see the eye doctor. Please bring your insurance card.</p>
+      </div>
+    </div>
+  `;
+  
+  return summarySection;
 }
 
 function resetWidgetPosition(container) {
@@ -869,7 +876,7 @@ async function fetchSummaryWithRetry(apiKey, roomId, summaryLoader, summaryConte
   
   try {
     const headers = getDefaultApiHeaders(apiKey);
-    const req = await fetch(`https://thinkrr.xano.io/api:Jy1ozuiJ:dev/call-summary?roomId=${cleanRoomId}`, {
+    const req = await fetch(`${getCallSummaryUrl}?roomId=${cleanRoomId}`, {
       method: "GET",
       headers: headers,
     });
