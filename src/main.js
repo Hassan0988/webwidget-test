@@ -690,7 +690,7 @@ async function showSummary(apiKey, targetEl) {
   const callState = state[apiKey];
   
   // Check if summary is enabled in config (default to true if not specified)
-  const isSummaryEnabled = callState.config.isSummaryEnabled !== undefined ? callState.config.isSummaryEnabled : true;
+  const isSummaryEnabled = callState.config.isSummaryEnabled !== undefined ? callState.config.isSummaryEnabled : false;
   if (!isSummaryEnabled) {
     console.log('Summary generation is disabled in config');
     return;
