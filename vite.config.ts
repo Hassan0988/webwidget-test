@@ -8,7 +8,8 @@ export default defineConfig({
       "julietta-unjewelled-rosily.ngrok-free.dev",
       "localhost",
       "127.0.0.1",
-      "*.netlify.app"
+      "*.netlify.app",
+      "https://devserver-main--resilient-crepe-03f0a4.netlify.app"
     ]
   },
   resolve: {
