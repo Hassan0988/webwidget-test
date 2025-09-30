@@ -753,7 +753,7 @@ async function showSummary(apiKey, targetEl) {
       showDefaultSummary(summaryLoader, summaryContent);
       callState.summaryGenerating = false;
     }
-  }, 5000);
+  }, 8000);
   
   // Add close button handler
   if (closeBtn) {
@@ -897,7 +897,7 @@ async function fetchSummaryWithRetry(apiKey, roomId, summaryLoader, summaryConte
           // Retry after 2 seconds
           setTimeout(() => {
             fetchSummaryWithRetry(apiKey, roomId, summaryLoader, summaryContent, retryCount + 1);
-          }, 3000);
+          }, 4000);
         } else {
           // Max retries reached, show default summary
           console.log('Max retries reached, showing default summary');
